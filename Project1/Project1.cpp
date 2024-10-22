@@ -7,6 +7,7 @@
 #include <QDir>
 #include <windows.h>
 #include <tlhelp32.h>
+#include <QDebug>
 
 //путь к файлу
 const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
@@ -48,6 +49,27 @@ void Project1::on_actionOpen() {
 
         //сохранения таблицы при каждом добавлении нового процесса
         saveTable(csvFilePath);
+    }
+}
+
+//обработчик нажатия на кнопку таблица -> очистить
+void Project1::on_actionClear() {
+    //очистка таблицы
+    ui.tableWidget->clearContents();
+    ui.tableWidget->setRowCount(0);
+
+    //очистка списка процессов
+    processList.clear();
+
+    //очистка CSV файла
+    QFile file(csvFilePath);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        //пустая запись в файл для его очистки
+        file.resize(0);
+        file.close();
+    }
+    else {
+        qDebug() << "Не удалось очистить файл!!!";
     }
 }
 
