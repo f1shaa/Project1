@@ -25,6 +25,9 @@ private slots:
     void on_actionClear(); //таблица -> очистить...
 
 private:
+    void saveTable(const QString& filePath); //сохранение таблицы в csv
+
+
     Ui::Project1Class ui;
     QTimer* timer;
     QList<ProcessInfo> processList;

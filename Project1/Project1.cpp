@@ -25,6 +25,48 @@ Project1::Project1(QWidget *parent)
 Project1::~Project1()
 {}
 
+//обработчик нажатия на кнопку файл -> открыть
+void Project1::on_actionOpen() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Executable"), "", tr("Executable Files (*.exe);;All Files (*)"));
+
+    if (!fileName.isEmpty()) {
+        QFileInfo fileInfo(fileName); //получение информации о файле
+        QString filePath = fileInfo.absolutePath(); //путь к файлу
+        QString fileNameInfo = fileInfo.fileName(); //имя файла
+
+        //добавление информации о процессе в список
+        ProcessInfo processInfo = { fileNameInfo, filePath, false };
+        processList.append(processInfo);
+
+        int rowCount = ui.tableWidget->rowCount();
+        ui.tableWidget->insertRow(rowCount);
+
+        //заполнение столбцов
+        ui.tableWidget->setItem(rowCount, 0, new QTableWidgetItem(fileNameInfo)); //имя файла в 1 столбец
+        ui.tableWidget->setItem(rowCount, 1, new QTableWidgetItem(filePath)); //путь во 2 столбец
+        ui.tableWidget->setItem(rowCount, 2, new QTableWidgetItem("Inactive")); //статус по умолочанию
+
+        //сохранения таблицы при каждом добавлении нового процесса
+        saveTable(csvFilePath);
+    }
+}
+
+//метод для сохранения данных в CSV файл
+void Project1::saveTable(const QString& filePath) {
+    QFile file(filePath);
+
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream stream(&file);
+
+        for (int i = 0; i < ui.tableWidget->rowCount(); ++i) {
+            QString name = ui.tableWidget->item(i, 0)->text(); //имя файла
+            QString path = ui.tableWidget->item(i, 1)->text(); //путь к файлу
+            stream << name << "," << path << "\n"; //сохранение в формате CSV
+        }
+        file.close();
+    }
+}
+
 //метод определения активности процессов
 void Project1::checkProcesses() {
     //снимок всех процессов в системе
