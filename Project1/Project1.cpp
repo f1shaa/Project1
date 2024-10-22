@@ -42,7 +42,7 @@ void Project1::on_actionOpen() {
 
     if (!fileName.isEmpty()) {
         QFileInfo fileInfo(fileName); //получение информации о файле
-        QString filePath = fileInfo.absolutePath(); //путь к файлу
+        QString filePath = fileInfo.absoluteFilePath(); //путь к файлу
         QString fileNameInfo = fileInfo.fileName(); //имя файла
 
         //добавление информации о процессе в список
@@ -136,8 +136,8 @@ void Project1::checkProcesses() {
     pe32.dwSize = sizeof(PROCESSENTRY32); //размер структуры
 
     //установка статуса по умолочанию для всех процессов
-    for (int i = 0; i < processList.size(); i++) {
-        processList[1].isActive = false;
+    for (int i = 0; i < processList.size(); ++i) {
+        processList[i].isActive = false;
     }
 
     //перебор всех процессов
@@ -145,7 +145,7 @@ void Project1::checkProcesses() {
         do {
             QString currentProcessName = QString::fromWCharArray(pe32.szExeFile);
 
-            for (int i = 0; i < processList.size(); i++) {
+            for (int i = 0; i < processList.size(); ++i) {
                 if (processList[i].name == currentProcessName) {
                     processList[i].isActive = true; //процесс найден -> активен
                 }
