@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>592</width>
-    <height>400</height>
+    <width>774</width>
+    <height>449</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,13 +19,16 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>571</width>
+      <width>751</width>
       <height>331</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
       <widget class="QTableWidget" name="tableWidget">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
        <property name="editTriggers">
         <set>QAbstractItemView::SelectedClicked</set>
        </property>
@@ -50,9 +53,40 @@
          <string>Состояние</string>
         </property>
        </column>
+       <column>
+        <property name="text">
+         <string>Время</string>
+        </property>
+       </column>
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QPushButton" name="buttonClose">
+    <property name="geometry">
+     <rect>
+      <x>449</x>
+      <y>370</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Завершить процесс</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonStartTime">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>370</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Отложить</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -60,7 +94,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>592</width>
+     <width>774</width>
      <height>21</height>
     </rect>
    </property>
