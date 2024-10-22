@@ -89,6 +89,34 @@ void Project1::saveTable(const QString& filePath) {
     }
 }
 
+//метод для загрузки данных из CSV файла
+void Project1::loadTable(const QString& filePath) {
+    QFile file(filePath);
+
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream stream(&file);
+        QString line;
+
+        //очистка таблицы перед загрузкой данных
+        ui.tableWidget->setRowCount(0);
+
+        while (!stream.atEnd()) {
+            line = stream.readLine();
+            QStringList rowData = line.split(",");
+
+            if (rowData.size() < 2) continue; //пропуск некорректных строк
+
+            int rowCount = ui.tableWidget->rowCount();
+            ui.tableWidget->insertRow(rowCount);
+
+            ui.tableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя файла
+            ui.tableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь к файлу
+            ui.tableWidget->setItem(rowCount, 2, new QTableWidgetItem("Inactive")); //статус по умолочанию
+        }
+        file.close();
+    }
+}
+
 //метод определения активности процессов
 void Project1::checkProcesses() {
     //снимок всех процессов в системе

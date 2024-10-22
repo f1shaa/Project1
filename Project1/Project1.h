@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_Project1.h"
 #include <QTimer>
+#include <QDir>
 
 //структура информации о процессе
 struct ProcessInfo {
@@ -25,11 +26,12 @@ private slots:
     void on_actionClear(); //таблица -> очистить...
 
 private:
-    void saveTable(const QString& filePath); //сохранение таблицы в csv
-
+    void saveTable(const QString& filePath); //сохранение таблицы в CSV
+    void loadTable(const QString& filePath); //загрузка таблицы из CSV
 
     Ui::Project1Class ui;
     QTimer* timer;
     QList<ProcessInfo> processList;
 
+    const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
 };
