@@ -15,7 +15,17 @@ const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
 Project1::Project1(QWidget *parent)
     : QMainWindow(parent)
 {
+    //запуск приложения
     ui.setupUi(this);
+
+    //загрузка таблицы из файла при запуске
+    loadTable(csvFilePath);
+
+    //подключение действия файл -> открыть...
+    connect(ui.actionOpen, &QAction::triggered, this, &Project1::on_actionOpen);
+
+    //подключение действия таблица -> очистить...
+    connect(ui.actionClear, &QAction::triggered, this, &Project1::on_actionClear);
 
     //настройки таймера
     timer = new QTimer(this);
