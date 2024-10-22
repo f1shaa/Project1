@@ -9,9 +9,16 @@
 #include <tlhelp32.h>
 #include <QDebug>
 #include <QMessageBox>
+#include <QMenu>
+#include <QAction>
+#include <QPoint>
+#include <QCursor>
 
 //путь к файлу
 const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
+
+//контекстное меню
+QMenu* contextMenu;
 
 Project1::Project1(QWidget *parent)
     : QMainWindow(parent)
@@ -32,6 +39,20 @@ Project1::Project1(QWidget *parent)
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Project1::checkProcesses);
     timer->start(1000); //интервал в 1с
+
+    //настройка контекстного меню
+    contextMenu = new QMenu(this);
+    //действия
+    QAction* deleteAction = new QAction("delete", this);
+    connect(deleteAction, &QAction::triggered, this, &Project1::on_actionDelete);
+    QAction* editAction = new QAction("change start settings", this);
+    connect(editAction, &QAction::triggered, this, &Project1::on_actionEdit);
+    //добавления действия в меню
+    contextMenu->addAction(deleteAction);
+    contextMenu->addAction(editAction);
+    //политика меню
+    ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui.tableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu);
 }
 
 Project1::~Project1()
@@ -93,6 +114,32 @@ void Project1::on_actionClear() {
     }
 }
 
+//обработчик нажатия на кнопку ПКМ -> удалить
+void Project1::on_actionDelete() {
+    int indexRow = ui.tableWidget->currentRow();
+    if (indexRow >= 0) {
+        ui.tableWidget->removeRow(indexRow); //удалить из таблицы
+        processList.removeAt(indexRow); //удалить из списка
+        saveTable(csvFilePath); //обновить файл
+    }
+}
+
+//обработчик нажатия на кнопку ПКМ -> изменить параметры запуска
+void Project1::on_actionEdit() {
+    int indexRow = ui.tableWidget->currentRow();
+    if (indexRow >= 0) {
+        
+    }
+}
+
+//метод отображения контекстного меню
+void Project1::showContextMenu(const QPoint& pos) {
+    QTableWidgetItem* item = ui.tableWidget->itemAt(pos);
+    if (item) {
+        contextMenu->exec(QCursor::pos());
+    }
+}
+
 //метод для сохранения данных в CSV файл
 void Project1::saveTable(const QString& filePath) {
     QFile file(filePath);
@@ -119,6 +166,7 @@ void Project1::loadTable(const QString& filePath) {
 
         //очистка таблицы перед загрузкой данных
         ui.tableWidget->setRowCount(0);
+        processList.clear();
 
         while (!stream.atEnd()) {
             line = stream.readLine();
@@ -132,6 +180,10 @@ void Project1::loadTable(const QString& filePath) {
             ui.tableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя файла
             ui.tableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь к файлу
             ui.tableWidget->setItem(rowCount, 2, new QTableWidgetItem("Inactive")); //статус по умолочанию
+
+            //добавление процесса в список processList
+            ProcessInfo processInfo = { rowData[0], rowData[1], false };
+            processList.append(processInfo);
         }
         file.close();
     }
