@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <tlhelp32.h>
 #include <QDebug>
+#include <QMessageBox>
 
 //путь к файлу
 const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
@@ -44,6 +45,15 @@ void Project1::on_actionOpen() {
         QFileInfo fileInfo(fileName); //получение информации о файле
         QString filePath = fileInfo.absoluteFilePath(); //путь к файлу
         QString fileNameInfo = fileInfo.fileName(); //имя файла
+
+        //проверка на дублирование процееса
+        for (int i = 0; i < ui.tableWidget->rowCount(); i++) {
+            QTableWidgetItem* item = ui.tableWidget->item(i, 0);
+            if (item && item->text() == fileNameInfo) {
+                QMessageBox::information(this, "Внимание", "Процесс уже в списке!!!");
+                return;
+            }
+        }
 
         //добавление информации о процессе в список
         ProcessInfo processInfo = { fileNameInfo, filePath, false };
