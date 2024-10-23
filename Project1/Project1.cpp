@@ -15,8 +15,10 @@
 #include <QCursor>
 #include <QProcess>
 
-//путь к файлу
+//путь к файлу со списком приложений
 const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
+//путь к файлу со списком автозапуска приложений
+const QString csvFilePath2 = QDir::currentPath() + "/process_list_2.csv";
 
 //контекстное меню
 QMenu* contextMenu;
@@ -27,8 +29,11 @@ Project1::Project1(QWidget *parent)
     //запуск приложения
     ui.setupUi(this);
 
-    //загрузка таблицы из файла при запуске
+    //загрузка таблицы со списком пользователя из файла при запуске
     loadTable(csvFilePath);
+
+    //загрузка таблицы с автозапуском из файла при запуске
+    loadAutoStartTable(csvFilePath2);
 
     //подключение действия файл -> открыть...
     connect(ui.actionOpen, &QAction::triggered, this, &Project1::on_actionOpen);
@@ -47,12 +52,12 @@ Project1::Project1(QWidget *parent)
     connect(timer, &QTimer::timeout, this, &Project1::checkProcesses);
     timer->start(1000); //интервал в 1с
 
-    //настройка контекстного меню
+    //настройка контекстного меню для таблицы с процессами
     contextMenu = new QMenu(this);
     //действия
-    QAction* deleteAction = new QAction("delete", this);
+    QAction* deleteAction = new QAction("Delete", this);
     connect(deleteAction, &QAction::triggered, this, &Project1::on_actionDelete);
-    QAction* editAction = new QAction("change start settings", this);
+    QAction* editAction = new QAction("Add auto start", this);
     connect(editAction, &QAction::triggered, this, &Project1::on_actionEdit);
     //добавления действия в меню
     contextMenu->addAction(deleteAction);
@@ -61,6 +66,14 @@ Project1::Project1(QWidget *parent)
     ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui.tableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu);
 
+    //настройка контекстного меню для таблицы автозапуска
+    autoStartContextMenu = new QMenu(this);
+    QAction* deleteAutoStartAction = new QAction("Delete", this);
+    connect(deleteAutoStartAction, &QAction::triggered, this, &Project1::on_actionDeleteAutoStart);
+    autoStartContextMenu->addAction(deleteAutoStartAction);
+    //политика меню
+    ui.autoStartTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui.autoStartTableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu2);
     
 }
 
@@ -80,7 +93,7 @@ void Project1::on_actionOpen() {
         for (int i = 0; i < ui.tableWidget->rowCount(); i++) {
             QTableWidgetItem* item = ui.tableWidget->item(i, 0);
             if (item && item->text() == fileNameInfo) {
-                QMessageBox::information(this, "Внимание", "Процесс уже в списке!!!");
+                QMessageBox::information(this, "Attention", "The process is already on the list!!!");
                 return;
             }
         }
@@ -102,7 +115,7 @@ void Project1::on_actionOpen() {
     }
 }
 
-//обработчик нажатия на кнопку таблица -> очистить
+//обработчик нажатия на кнопку таблица -> очистить, для таблицы с процессами
 void Project1::on_actionClear() {
     //очистка таблицы
     ui.tableWidget->clearContents();
@@ -123,7 +136,7 @@ void Project1::on_actionClear() {
     }
 }
 
-//обработчик нажатия на кнопку ПКМ -> удалить
+//обработчик нажатия на кнопку ПКМ -> удалить, для таблицы с процессами
 void Project1::on_actionDelete() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
@@ -133,7 +146,7 @@ void Project1::on_actionDelete() {
     }
 }
 
-//обработчик нажатия на кнопку ПКМ -> изменить параметры запуска
+//обработчик нажатия на кнопку ПКМ -> изменить параметры запуска, для таблицы с процессами
 void Project1::on_actionEdit() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
@@ -155,10 +168,12 @@ void Project1::on_actionEdit() {
         ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(processPath)); //путь
         ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem(0)); //время по умолчанию
 
+        //сохранение в таблицу автозапуска
+        saveAutoStartTable(csvFilePath2);
     }
 }
 
-//обработчик нажатия на кнопку заврешить процесс
+//обработчик нажатия на кнопку заврешить процесс, для таблицы с процессами
 void Project1::on_buttonClose() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
@@ -204,25 +219,59 @@ void Project1::on_buttonClose() {
     }
 }
 
-//обработчик нажатия на кнопку запуск
+//обработчик нажатия на кнопку запуск, для таблицы с процессами
 void Project1::on_buttonStart() {
-    QMessageBox::information(this, "Внимание", "Процесс уже в списке!!!");
-
     //перебор процессов в таблице
-    for (int i = 0; i < processList.size(); ++i) {
-        //проверка состояния процесса
-        if (!processList[i].isActive) {
-            //запуск процесса
-            QProcess::startDetached(processList[i].path);
+    for (int i = 0; i < ui.autoStartTableWidget->rowCount(); ++i) {
+        //получение состояния процесса
+        QString processName = ui.autoStartTableWidget->item(i, 0)->text(); //имя
+        QString processPath = ui.autoStartTableWidget->item(i, 1)->text(); //путь
+        QString processStatus = ui.autoStartTableWidget->item(i, 2)->text(); //время
+
+        //проверка активности процесса
+        bool isActive = false;
+        for (const ProcessInfo& processInfo : processList) {
+            if (processInfo.name == processName && processInfo.isActive) {
+                isActive = true;
+                break;
+            }
+        }
+
+        //запуск процесса, если он не активен
+        if (!isActive) {
+            QProcess::startDetached(processPath);
         }
     }
 }
 
-//метод отображения контекстного меню
+//обработчик нажатия на кнопку ПКМ -> удалить, для таблицы автозапуска
+void Project1::on_actionDeleteAutoStart() {
+    int indexRow = ui.autoStartTableWidget->currentRow();
+    if (indexRow >= 0) {
+        ui.autoStartTableWidget->removeRow(indexRow); //удалить
+        saveAutoStartTable(csvFilePath2); //обновить файл автозапуска
+    }
+};
+
+//метод отображения контекстного меню для таблцы с процессами
 void Project1::showContextMenu(const QPoint& pos) {
     QTableWidgetItem* item = ui.tableWidget->itemAt(pos);
     if (item) {
         contextMenu->exec(QCursor::pos());
+    }
+    else {
+        qDebug() << "No item at position" << pos;
+    }
+}
+
+//метод отображения контекстного меню для таблицы автозапуска
+void Project1::showContextMenu2(const QPoint& pos) {
+    QTableWidgetItem* item = ui.autoStartTableWidget->itemAt(pos);
+    if (item) {
+        autoStartContextMenu->exec(QCursor::pos());
+    }
+    else {
+        qDebug() << "No item at position" << pos;
     }
 }
 
@@ -273,10 +322,53 @@ void Project1::loadTable(const QString& filePath) {
         }
         file.close();
     }
-    on_buttonStart(); //автозапуск программ из таблицы
 }
 
-//
+//метод для сохранения списка автозапуска в CSV файл
+void Project1::saveAutoStartTable(const QString& filePath) {
+    QFile file(filePath);
+
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream stream(&file);
+
+        for (int i = 0; i < ui.autoStartTableWidget->rowCount(); ++i) {
+            QString name = ui.autoStartTableWidget->item(i, 0)->text(); //имя
+            QString path = ui.autoStartTableWidget->item(i, 1)->text(); //путь
+            QString time = ui.autoStartTableWidget->item(i, 2)->text(); //время
+            stream << name << "," << path << "," << time << "\n"; //сохранить
+        }
+        file.close();
+    }
+}
+
+//метод для загрузки списка автозапуска в CSV файл
+void Project1::loadAutoStartTable(const QString& filePath) {
+    QFile file(filePath);
+
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream stream(&file);
+        QString line;
+
+        //очистка таблицы перед загрузкой данных
+        ui.autoStartTableWidget->setRowCount(0);
+
+        while (!stream.atEnd()) {
+            line = stream.readLine();
+            QStringList rowData = line.split(",");
+
+            if (rowData.size() < 3) continue; //пропуск некорректных строк
+
+            //добавление процесса в таблицу автозапуска
+            int rowCount = ui.autoStartTableWidget->rowCount();
+            ui.autoStartTableWidget->insertRow(rowCount);
+            ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя
+            ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь
+            ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem(rowData[2])); //время
+        }
+        file.close();
+    }
+    on_buttonStart(); //автозапуск программ из таблицы
+}
 
 //метод определения активности процессов
 void Project1::checkProcesses() {

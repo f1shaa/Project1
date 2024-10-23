@@ -37,15 +37,24 @@ private slots:
     void on_buttonClose(); //завершить процесс
     void on_buttonStart(); //запустить все процессы
 
+    //для таблицы автозапуска
+    void on_actionDeleteAutoStart(); //ПКМ -> удалить...
+
 private:
-    void saveTable(const QString& filePath); //сохранение таблицы в CSV
-    void loadTable(const QString& filePath); //загрузка таблицы из CSV
-    void showContextMenu(const QPoint& pos); //отображение контекстного меню
+    QMenu* contextMenu;
+    QMenu* autoStartContextMenu;
+
+    void saveTable(const QString& filePath); //сохранение списка пользователя в CSV
+    void loadTable(const QString& filePath); //загрузка списка пользователя из CSV
+    void showContextMenu(const QPoint& pos); //отображение контекстного меню для процессов
+
+    void saveAutoStartTable(const QString& filePath); //сохранения списка автозапуска в CSV
+    void loadAutoStartTable(const QString& filePath); //загрузка списка автозапуска в CSV
+    void showContextMenu2(const QPoint& pos); //отображение контекстного меню для автозапуска
 
     Ui::Project1Class ui;
     QTimer* timer;
     QList<ProcessInfo> processList;
 
-    QMenu* contextMenu;
     const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
 };
