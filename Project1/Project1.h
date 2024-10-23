@@ -27,6 +27,7 @@ private slots:
     void on_actionDelete(); //ПКМ -> удалить...
     void on_actionEdit(); //ПКЬ -> изменить параметры запуска...
     void on_buttonClose(); //завершить процесс
+    void on_buttonStart(); //запустить все процессы
 
 private:
     void saveTable(const QString& filePath); //сохранение таблицы в CSV

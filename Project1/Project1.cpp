@@ -13,6 +13,7 @@
 #include <QAction>
 #include <QPoint>
 #include <QCursor>
+#include <QProcess>
 
 //путь к файлу
 const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
@@ -37,6 +38,9 @@ Project1::Project1(QWidget *parent)
 
     //подключение кнопки завершить процесс
     connect(ui.buttonClose, &QPushButton::clicked, this, &Project1::on_buttonClose);
+
+    //подключение кнопки запуск
+    connect(ui.buttonStart, &QPushButton::clicked, this, &Project1::on_buttonStart);
 
     //настройки таймера
     timer = new QTimer(this);
@@ -181,6 +185,20 @@ void Project1::on_buttonClose() {
     }
 }
 
+//обработчик нажатия на кнопку запуск
+void Project1::on_buttonStart() {
+    QMessageBox::information(this, "Внимание", "Процесс уже в списке!!!");
+
+    //перебор процессов в таблице
+    for (int i = 0; i < processList.size(); ++i) {
+        //проверка состояния процесса
+        if (!processList[i].isActive) {
+            //запуск процесса
+            QProcess::startDetached(processList[i].path);
+        }
+    }
+}
+
 //метод отображения контекстного меню
 void Project1::showContextMenu(const QPoint& pos) {
     QTableWidgetItem* item = ui.tableWidget->itemAt(pos);
@@ -236,6 +254,7 @@ void Project1::loadTable(const QString& filePath) {
         }
         file.close();
     }
+    on_buttonStart(); //автозапуск программ из таблицы
 }
 
 //метод определения активности процессов

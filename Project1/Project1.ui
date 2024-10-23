@@ -78,14 +78,27 @@
    <widget class="QPushButton" name="buttonStartTime">
     <property name="geometry">
      <rect>
-      <x>540</x>
+      <x>630</x>
+      <y>340</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Отложенный запуск</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonStart">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
       <y>370</y>
       <width>80</width>
       <height>24</height>
      </rect>
     </property>
     <property name="text">
-     <string>Отложить</string>
+     <string>Запуск</string>
     </property>
    </widget>
   </widget>
