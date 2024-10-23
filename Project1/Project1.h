@@ -12,6 +12,14 @@ struct ProcessInfo {
     bool isActive;
 };
 
+//структура таблицы автозапуска
+struct AutoStartProcess {
+    QString name;
+    QString path;
+    bool autoStart;
+    int delay;
+};
+
 class Project1 : public QMainWindow
 {
     Q_OBJECT

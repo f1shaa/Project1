@@ -6,66 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>774</width>
-    <height>449</height>
+    <width>602</width>
+    <height>445</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Project1</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="gridLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>751</width>
-      <height>331</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QTableWidget" name="tableWidget">
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::SelectedClicked</set>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::SingleSelection</enum>
-       </property>
-       <attribute name="horizontalHeaderDefaultSectionSize">
-        <number>182</number>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>Имя</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Путь</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Состояние</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Время</string>
-        </property>
-       </column>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QPushButton" name="buttonClose">
     <property name="geometry">
      <rect>
-      <x>630</x>
+      <x>450</x>
       <y>370</y>
       <width>131</width>
       <height>24</height>
@@ -78,7 +30,7 @@
    <widget class="QPushButton" name="buttonStartTime">
     <property name="geometry">
      <rect>
-      <x>630</x>
+      <x>450</x>
       <y>340</y>
       <width>131</width>
       <height>24</height>
@@ -101,13 +53,122 @@
      <string>Запуск</string>
     </property>
    </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>581</width>
+      <height>321</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <widget class="QWidget" name="tab_9">
+     <attribute name="title">
+      <string>Процессы</string>
+     </attribute>
+     <widget class="QWidget" name="gridLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>571</width>
+        <height>291</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0" colspan="2">
+        <widget class="QTableWidget" name="tableWidget">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::SelectedClicked</set>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>182</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Путь</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Состояние</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_10">
+     <attribute name="title">
+      <string>Автозапуск</string>
+     </attribute>
+     <widget class="QWidget" name="gridLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>571</width>
+        <height>291</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="autoStartTableWidget">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::SelectedClicked</set>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>182</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Путь</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Время</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>774</width>
+     <width>602</width>
      <height>21</height>
     </rect>
    </property>

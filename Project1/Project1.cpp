@@ -60,6 +60,8 @@ Project1::Project1(QWidget *parent)
     //политика меню
     ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui.tableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu);
+
+    
 }
 
 Project1::~Project1()
@@ -135,7 +137,24 @@ void Project1::on_actionDelete() {
 void Project1::on_actionEdit() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
-        
+        //получение данных о процессе
+        QString processName = ui.tableWidget->item(indexRow, 0)->text();
+        QString processPath = ui.tableWidget->item(indexRow, 1)->text();
+
+        //проверка на дублирование процесса в автозапуске
+        for (int i = 0; i < ui.autoStartTableWidget->rowCount(); i++) {
+            if (ui.autoStartTableWidget->item(i, 0)->text() == processName) {
+                return;
+            }
+        }
+
+        //добавление процесса в таблицу автозапуска
+        int rowCount = ui.autoStartTableWidget->rowCount();
+        ui.autoStartTableWidget->insertRow(rowCount);
+        ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(processName)); //имя
+        ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(processPath)); //путь
+        ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem(0)); //время по умолчанию
+
     }
 }
 
@@ -207,7 +226,7 @@ void Project1::showContextMenu(const QPoint& pos) {
     }
 }
 
-//метод для сохранения данных в CSV файл
+//метод для сохранения списка пользователя в CSV файл
 void Project1::saveTable(const QString& filePath) {
     QFile file(filePath);
 
@@ -223,7 +242,7 @@ void Project1::saveTable(const QString& filePath) {
     }
 }
 
-//метод для загрузки данных из CSV файла
+//метод для загрузки списка пользователя из CSV файла
 void Project1::loadTable(const QString& filePath) {
     QFile file(filePath);
 
@@ -256,6 +275,8 @@ void Project1::loadTable(const QString& filePath) {
     }
     on_buttonStart(); //автозапуск программ из таблицы
 }
+
+//
 
 //метод определения активности процессов
 void Project1::checkProcesses() {
