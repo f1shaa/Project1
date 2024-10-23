@@ -35,6 +35,9 @@ Project1::Project1(QWidget *parent)
     //подключение действия таблица -> очистить...
     connect(ui.actionClear, &QAction::triggered, this, &Project1::on_actionClear);
 
+    //подключение кнопки завершить процесс
+    connect(ui.buttonClose, &QPushButton::clicked, this, &Project1::on_buttonClose);
+
     //настройки таймера
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Project1::checkProcesses);
@@ -129,6 +132,52 @@ void Project1::on_actionEdit() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
         
+    }
+}
+
+//обработчик нажатия на кнопку заврешить процесс
+void Project1::on_buttonClose() {
+    int indexRow = ui.tableWidget->currentRow();
+    if (indexRow >= 0) {
+        //получение состояния процесса
+        QString processStatus = ui.tableWidget->item(indexRow, 2)->text();
+
+        //проверка состояния процесса
+        if (processStatus == "Active") {
+            //получение имени процесса
+            QString processName = ui.tableWidget->item(indexRow, 0)->text();
+
+            //поиск среди всех процессов
+            HANDLE hProcessesSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            PROCESSENTRY32 pe32;
+            pe32.dwSize = sizeof(PROCESSENTRY32);
+
+            bool processFound = false;
+
+            //перебор всех процессов
+            if (Process32First(hProcessesSnapshot, &pe32)) {
+                do {
+                    QString currentProcessName = QString::fromWCharArray(pe32.szExeFile);
+                    
+                    if (currentProcessName.compare(processName, Qt::CaseInsensitive) == 0) {
+                        //получение ID процесса
+                        HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe32.th32ProcessID);
+                        if (hProcess != NULL) {
+                            //завершение процесса
+                            TerminateProcess(hProcess, 0);
+                            CloseHandle(hProcess);
+                            processFound = true;
+                            break;
+                        }
+                    }
+                } while (Process32Next(hProcessesSnapshot, &pe32));
+            }
+            CloseHandle(hProcessesSnapshot);
+            if (processFound) {
+                // Обновление статуса в таблице на "Inactive"
+                ui.tableWidget->item(indexRow, 2)->setText("Inactive");
+            }
+        }
     }
 }
 
