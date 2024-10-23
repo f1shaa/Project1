@@ -16,7 +16,6 @@ struct ProcessInfo {
 struct AutoStartProcess {
     QString name;
     QString path;
-    bool autoStart;
     int delay;
 };
 
@@ -35,10 +34,11 @@ private slots:
     void on_actionDelete(); //ПКМ -> удалить...
     void on_actionEdit(); //ПКЬ -> изменить параметры запуска...
     void on_buttonClose(); //завершить процесс
-    void on_buttonStart(); //запустить все процессы
+    void on_buttonStart(); //запуск процессов из автозапуска
 
     //для таблицы автозапуска
     void on_actionDeleteAutoStart(); //ПКМ -> удалить...
+    void on_actionSetTime(); //ПКМ -> установить время...
 
 private:
     QMenu* contextMenu;
@@ -55,6 +55,7 @@ private:
     Ui::Project1Class ui;
     QTimer* timer;
     QList<ProcessInfo> processList;
+    QList<AutoStartProcess> autoStartProcesses;
 
     const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
 };

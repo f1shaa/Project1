@@ -14,6 +14,7 @@
 #include <QPoint>
 #include <QCursor>
 #include <QProcess>
+#include <QInputDialog>
 
 //путь к файлу со списком приложений
 const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
@@ -44,9 +45,6 @@ Project1::Project1(QWidget *parent)
     //подключение кнопки завершить процесс
     connect(ui.buttonClose, &QPushButton::clicked, this, &Project1::on_buttonClose);
 
-    //подключение кнопки запуск
-    connect(ui.buttonStart, &QPushButton::clicked, this, &Project1::on_buttonStart);
-
     //настройки таймера
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Project1::checkProcesses);
@@ -70,7 +68,10 @@ Project1::Project1(QWidget *parent)
     autoStartContextMenu = new QMenu(this);
     QAction* deleteAutoStartAction = new QAction("Delete", this);
     connect(deleteAutoStartAction, &QAction::triggered, this, &Project1::on_actionDeleteAutoStart);
+    QAction* setTimeAction = new QAction("Set Time", this);
+    connect(setTimeAction, &QAction::triggered, this, &Project1::on_actionSetTime);
     autoStartContextMenu->addAction(deleteAutoStartAction);
+    autoStartContextMenu->addAction(setTimeAction);
     //политика меню
     ui.autoStartTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui.autoStartTableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu2);
@@ -166,8 +167,9 @@ void Project1::on_actionEdit() {
         ui.autoStartTableWidget->insertRow(rowCount);
         ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(processName)); //имя
         ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(processPath)); //путь
-        ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem(0)); //время по умолчанию
+        ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem("0")); //время по умолчанию
 
+        autoStartProcesses.append({ processName, processPath, 0 }); //сохранение в список автозапуска
         //сохранение в таблицу автозапуска
         saveAutoStartTable(csvFilePath2);
     }
@@ -226,9 +228,9 @@ void Project1::on_buttonStart() {
         //получение состояния процесса
         QString processName = ui.autoStartTableWidget->item(i, 0)->text(); //имя
         QString processPath = ui.autoStartTableWidget->item(i, 1)->text(); //путь
-        QString processStatus = ui.autoStartTableWidget->item(i, 2)->text(); //время
+        int delay = autoStartProcesses[i].delay; //задержка
 
-        //проверка активности процесса
+        //проверка состояния процесса
         bool isActive = false;
         for (const ProcessInfo& processInfo : processList) {
             if (processInfo.name == processName && processInfo.isActive) {
@@ -237,9 +239,18 @@ void Project1::on_buttonStart() {
             }
         }
 
-        //запуск процесса, если он не активен
+        //запуск, если неактивен
         if (!isActive) {
-            QProcess::startDetached(processPath);
+            if (delay > 0) {
+                //запуск с задержкой
+                QTimer::singleShot(delay * 1000, [=]() {
+                    QProcess::startDetached(processPath);
+                    });
+            }
+            else {
+                //немедленный запуск, если задержки нет
+                QProcess::startDetached(processPath);
+            }
         }
     }
 }
@@ -252,6 +263,29 @@ void Project1::on_actionDeleteAutoStart() {
         saveAutoStartTable(csvFilePath2); //обновить файл автозапуска
     }
 };
+
+//обработчик нажатия на кнопку ПКМ -> установить время, для таблицы с автозапуском
+void Project1::on_actionSetTime() {
+    int indexRow = ui.autoStartTableWidget->currentRow();
+    if (indexRow >= 0) {
+        const int minDelay = 1;    //min задержка в секундах
+        const int maxDelay = 3600; //max задержка в секундах
+        bool ok;
+        int delay = QInputDialog::getInt(this, tr("Set Time"),
+            tr("Enter delay in seconds:"),
+            ui.autoStartTableWidget->item(indexRow, 2)->text().toInt(),
+            minDelay, maxDelay, 1, &ok);
+
+        if (ok) {
+            //обновление времени в таблице и в структуре
+            ui.autoStartTableWidget->item(indexRow, 2)->setText(QString::number(delay));
+            autoStartProcesses[indexRow].delay = delay;
+
+            //сохранение в CSV файл
+            saveAutoStartTable(csvFilePath2);
+        }
+    }
+}
 
 //метод отображения контекстного меню для таблцы с процессами
 void Project1::showContextMenu(const QPoint& pos) {
@@ -334,8 +368,8 @@ void Project1::saveAutoStartTable(const QString& filePath) {
         for (int i = 0; i < ui.autoStartTableWidget->rowCount(); ++i) {
             QString name = ui.autoStartTableWidget->item(i, 0)->text(); //имя
             QString path = ui.autoStartTableWidget->item(i, 1)->text(); //путь
-            QString time = ui.autoStartTableWidget->item(i, 2)->text(); //время
-            stream << name << "," << path << "," << time << "\n"; //сохранить
+            QString delay = ui.autoStartTableWidget->item(i, 2)->text(); //время
+            stream << name << "," << path << "," << delay << "\n"; //сохранить
         }
         file.close();
     }
@@ -351,6 +385,7 @@ void Project1::loadAutoStartTable(const QString& filePath) {
 
         //очистка таблицы перед загрузкой данных
         ui.autoStartTableWidget->setRowCount(0);
+        autoStartProcesses.clear();
 
         while (!stream.atEnd()) {
             line = stream.readLine();
@@ -364,6 +399,10 @@ void Project1::loadAutoStartTable(const QString& filePath) {
             ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя
             ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь
             ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem(rowData[2])); //время
+        
+            //добавление процесса в список автозапуска
+            AutoStartProcess autoStartProcess = { rowData[0], rowData[1], rowData[2].toInt() };
+            autoStartProcesses.append(autoStartProcess);
         }
         file.close();
     }
