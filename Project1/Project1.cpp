@@ -75,7 +75,6 @@ Project1::Project1(QWidget *parent)
     //политика меню
     ui.autoStartTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui.autoStartTableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu2);
-    
 }
 
 Project1::~Project1()
@@ -116,24 +115,34 @@ void Project1::on_actionOpen() {
     }
 }
 
-//обработчик нажатия на кнопку таблица -> очистить, для таблицы с процессами
+//обработчик нажатия на кнопку таблица -> очистить
 void Project1::on_actionClear() {
-    //очистка таблицы
-    ui.tableWidget->clearContents();
-    ui.tableWidget->setRowCount(0);
+    //определение активной таблицы
+    if (ui.tableWidget->hasFocus()) {
+        //очистка таблицы процессов
+        ui.tableWidget->clearContents();
+        ui.tableWidget->setRowCount(0);
+        processList.clear();
 
-    //очистка списка процессов
-    processList.clear();
-
-    //очистка CSV файла
-    QFile file(csvFilePath);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        //пустая запись в файл для его очистки
-        file.resize(0);
-        file.close();
+        //очистка CSV файла для таблицы
+        QFile file(csvFilePath);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            file.resize(0); //очистка файла
+            file.close();
+        }
     }
-    else {
-        qDebug() << "Не удалось очистить файл!!!";
+    else if (ui.autoStartTableWidget->hasFocus()) {
+        //очистка таблицы автозапуска
+        ui.autoStartTableWidget->clearContents();
+        ui.autoStartTableWidget->setRowCount(0);
+        autoStartProcesses.clear();
+
+        //очистка CSV файла для автозапуска
+        QFile file(csvFilePath2);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            file.resize(0); //очистка файла
+            file.close();
+        }
     }
 }
 
@@ -441,6 +450,19 @@ void Project1::checkProcesses() {
         for (int j = 0; j < ui.tableWidget->rowCount(); ++j) {
             if (ui.tableWidget->item(j, 0)->text().compare(processList[i].name, Qt::CaseInsensitive) == 0) {
                 ui.tableWidget->item(j, 2)->setText(processList[i].isActive ? "Active" : "Inactive");
+                
+                //установка фона активности
+                if (processList[i].isActive) {
+                    ui.tableWidget->item(j, 0)->setBackground(QBrush(Qt::green));
+                    ui.tableWidget->item(j, 1)->setBackground(QBrush(Qt::green));
+                    ui.tableWidget->item(j, 2)->setBackground(QBrush(Qt::green)); //зеленый для активных
+                }
+                else {
+                    ui.tableWidget->item(j, 0)->setBackground(QBrush(Qt::red));
+                    ui.tableWidget->item(j, 1)->setBackground(QBrush(Qt::red));
+                    ui.tableWidget->item(j, 2)->setBackground(QBrush(Qt::red)); //красный для неактивных
+                }
+                
                 break; //выход из внутреннего цикла
             }
         }
