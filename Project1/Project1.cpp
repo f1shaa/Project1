@@ -223,16 +223,16 @@ void Project1::loadTable(const QString& filePath) {
 
             if (rowData.size() < 2) continue; //пропуск некорректных строк
 
+            //добавление процесса в список processList
+            ProcessInfo processInfo = { rowData[0], rowData[1], false };
+            processList.append(processInfo);
+
             int rowCount = ui.tableWidget->rowCount();
             ui.tableWidget->insertRow(rowCount);
 
             ui.tableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя файла
             ui.tableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь к файлу
             ui.tableWidget->setItem(rowCount, 2, new QTableWidgetItem("Inactive")); //статус по умолочанию
-
-            //добавление процесса в список processList
-            ProcessInfo processInfo = { rowData[0], rowData[1], false };
-            processList.append(processInfo);
         }
         file.close();
     }
@@ -268,21 +268,10 @@ void Project1::checkProcesses() {
     //обновление статуса в таблице
     for (int i = 0; i < processList.size(); ++i) {
         for (int j = 0; j < ui.tableWidget->rowCount(); ++j) {
-            if (ui.tableWidget->item(i, 0)->text() == processList[i].name) {
+            if (ui.tableWidget->item(j, 0)->text().compare(processList[i].name, Qt::CaseInsensitive) == 0) {
                 ui.tableWidget->item(j, 2)->setText(processList[i].isActive ? "Active" : "Inactive");
-
+                break; //выход из внутреннего цикла
             }
         }
-        //проверка закрытых процессов
-        if (!processList[i].isActive) {
-            for (int j = 0; j < ui.tableWidget->rowCount(); ++j) {
-                if (ui.tableWidget->item(j, 0)->text() == processList[i].name) {
-                    ui.tableWidget->item(j, 2)->setText("Inactive");
-                }
-            }
-        }
-
-        //сброс статуса для следующей проверки
-        processList[i].isActive = false;
     }
 }
