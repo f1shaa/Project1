@@ -1,4 +1,4 @@
-#include "Project1.h"
+п»ї#include "Project1.h"
 #include <QTimer>
 #include <QFileDialog>
 #include <QTableWidgetItem>
@@ -16,55 +16,55 @@
 #include <QProcess>
 #include <QInputDialog>
 
-//путь к файлу со списком приложений
+//РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ СЃРѕ СЃРїРёСЃРєРѕРј РїСЂРёР»РѕР¶РµРЅРёР№
 const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
-//путь к файлу со списком автозапуска приложений
+//РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ СЃРѕ СЃРїРёСЃРєРѕРј Р°РІС‚РѕР·Р°РїСѓСЃРєР° РїСЂРёР»РѕР¶РµРЅРёР№
 const QString csvFilePath2 = QDir::currentPath() + "/process_list_2.csv";
 
-//контекстное меню
+//РєРѕРЅС‚РµРєСЃС‚РЅРѕРµ РјРµРЅСЋ
 QMenu* contextMenu;
 
 Project1::Project1(QWidget *parent)
     : QMainWindow(parent)
 {
-    //запуск приложения
+    //Р·Р°РїСѓСЃРє РїСЂРёР»РѕР¶РµРЅРёСЏ
     ui.setupUi(this);
 
-    //загрузка таблицы со списком пользователя из файла при запуске
+    //Р·Р°РіСЂСѓР·РєР° С‚Р°Р±Р»РёС†С‹ СЃРѕ СЃРїРёСЃРєРѕРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР· С„Р°Р№Р»Р° РїСЂРё Р·Р°РїСѓСЃРєРµ
     loadTable(csvFilePath);
 
-    //загрузка таблицы с автозапуском из файла при запуске
+    //Р·Р°РіСЂСѓР·РєР° С‚Р°Р±Р»РёС†С‹ СЃ Р°РІС‚РѕР·Р°РїСѓСЃРєРѕРј РёР· С„Р°Р№Р»Р° РїСЂРё Р·Р°РїСѓСЃРєРµ
     loadAutoStartTable(csvFilePath2);
 
-    //подключение действия файл -> открыть...
+    //РїРѕРґРєР»СЋС‡РµРЅРёРµ РґРµР№СЃС‚РІРёСЏ С„Р°Р№Р» -> РѕС‚РєСЂС‹С‚СЊ...
     connect(ui.actionOpen, &QAction::triggered, this, &Project1::on_actionOpen);
 
-    //подключение действия таблица -> очистить...
+    //РїРѕРґРєР»СЋС‡РµРЅРёРµ РґРµР№СЃС‚РІРёСЏ С‚Р°Р±Р»РёС†Р° -> РѕС‡РёСЃС‚РёС‚СЊ...
     connect(ui.actionClear, &QAction::triggered, this, &Project1::on_actionClear);
 
-    //подключение кнопки завершить процесс
+    //РїРѕРґРєР»СЋС‡РµРЅРёРµ РєРЅРѕРїРєРё Р·Р°РІРµСЂС€РёС‚СЊ РїСЂРѕС†РµСЃСЃ
     connect(ui.buttonClose, &QPushButton::clicked, this, &Project1::on_buttonClose);
 
-    //настройки таймера
+    //РЅР°СЃС‚СЂРѕР№РєРё С‚Р°Р№РјРµСЂР°
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Project1::checkProcesses);
-    timer->start(1000); //интервал в 1с
+    timer->start(1000); //РёРЅС‚РµСЂРІР°Р» РІ 1СЃ
 
-    //настройка контекстного меню для таблицы с процессами
+    //РЅР°СЃС‚СЂРѕР№РєР° РєРѕРЅС‚РµРєСЃС‚РЅРѕРіРѕ РјРµРЅСЋ РґР»СЏ С‚Р°Р±Р»РёС†С‹ СЃ РїСЂРѕС†РµСЃСЃР°РјРё
     contextMenu = new QMenu(this);
-    //действия
+    //РґРµР№СЃС‚РІРёСЏ
     QAction* deleteAction = new QAction("Delete", this);
     connect(deleteAction, &QAction::triggered, this, &Project1::on_actionDelete);
     QAction* editAction = new QAction("Add auto start", this);
     connect(editAction, &QAction::triggered, this, &Project1::on_actionEdit);
-    //добавления действия в меню
+    //РґРѕР±Р°РІР»РµРЅРёСЏ РґРµР№СЃС‚РІРёСЏ РІ РјРµРЅСЋ
     contextMenu->addAction(deleteAction);
     contextMenu->addAction(editAction);
-    //политика меню
+    //РїРѕР»РёС‚РёРєР° РјРµРЅСЋ
     ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui.tableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu);
 
-    //настройка контекстного меню для таблицы автозапуска
+    //РЅР°СЃС‚СЂРѕР№РєР° РєРѕРЅС‚РµРєСЃС‚РЅРѕРіРѕ РјРµРЅСЋ РґР»СЏ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
     autoStartContextMenu = new QMenu(this);
     QAction* deleteAutoStartAction = new QAction("Delete", this);
     connect(deleteAutoStartAction, &QAction::triggered, this, &Project1::on_actionDeleteAutoStart);
@@ -72,7 +72,7 @@ Project1::Project1(QWidget *parent)
     connect(setTimeAction, &QAction::triggered, this, &Project1::on_actionSetTime);
     autoStartContextMenu->addAction(deleteAutoStartAction);
     autoStartContextMenu->addAction(setTimeAction);
-    //политика меню
+    //РїРѕР»РёС‚РёРєР° РјРµРЅСЋ
     ui.autoStartTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui.autoStartTableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu2);
 }
@@ -80,16 +80,16 @@ Project1::Project1(QWidget *parent)
 Project1::~Project1()
 {}
 
-//обработчик нажатия на кнопку файл -> открыть
+//РѕР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ С„Р°Р№Р» -> РѕС‚РєСЂС‹С‚СЊ
 void Project1::on_actionOpen() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Executable"), "", tr("Executable Files (*.exe);;All Files (*)"));
 
     if (!fileName.isEmpty()) {
-        QFileInfo fileInfo(fileName); //получение информации о файле
-        QString filePath = fileInfo.absoluteFilePath(); //путь к файлу
-        QString fileNameInfo = fileInfo.fileName(); //имя файла
+        QFileInfo fileInfo(fileName); //РїРѕР»СѓС‡РµРЅРёРµ РёРЅС„РѕСЂРјР°С†РёРё Рѕ С„Р°Р№Р»Рµ
+        QString filePath = fileInfo.absoluteFilePath(); //РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ
+        QString fileNameInfo = fileInfo.fileName(); //РёРјСЏ С„Р°Р№Р»Р°
 
-        //проверка на дублирование процееса
+        //РїСЂРѕРІРµСЂРєР° РЅР° РґСѓР±Р»РёСЂРѕРІР°РЅРёРµ РїСЂРѕС†РµРµСЃР°
         for (int i = 0; i < ui.tableWidget->rowCount(); i++) {
             QTableWidgetItem* item = ui.tableWidget->item(i, 0);
             if (item && item->text() == fileNameInfo) {
@@ -98,121 +98,121 @@ void Project1::on_actionOpen() {
             }
         }
 
-        //добавление информации о процессе в список
+        //РґРѕР±Р°РІР»РµРЅРёРµ РёРЅС„РѕСЂРјР°С†РёРё Рѕ РїСЂРѕС†РµСЃСЃРµ РІ СЃРїРёСЃРѕРє
         ProcessInfo processInfo = { fileNameInfo, filePath, false };
         processList.append(processInfo);
 
         int rowCount = ui.tableWidget->rowCount();
         ui.tableWidget->insertRow(rowCount);
 
-        //заполнение столбцов
-        ui.tableWidget->setItem(rowCount, 0, new QTableWidgetItem(fileNameInfo)); //имя файла в 1 столбец
-        ui.tableWidget->setItem(rowCount, 1, new QTableWidgetItem(filePath)); //путь во 2 столбец
-        ui.tableWidget->setItem(rowCount, 2, new QTableWidgetItem("Inactive")); //статус по умолочанию
+        //Р·Р°РїРѕР»РЅРµРЅРёРµ СЃС‚РѕР»Р±С†РѕРІ
+        ui.tableWidget->setItem(rowCount, 0, new QTableWidgetItem(fileNameInfo)); //РёРјСЏ С„Р°Р№Р»Р° РІ 1 СЃС‚РѕР»Р±РµС†
+        ui.tableWidget->setItem(rowCount, 1, new QTableWidgetItem(filePath)); //РїСѓС‚СЊ РІРѕ 2 СЃС‚РѕР»Р±РµС†
+        ui.tableWidget->setItem(rowCount, 2, new QTableWidgetItem("Inactive")); //СЃС‚Р°С‚СѓСЃ РїРѕ СѓРјРѕР»РѕС‡Р°РЅРёСЋ
 
-        //сохранения таблицы при каждом добавлении нового процесса
+        //СЃРѕС…СЂР°РЅРµРЅРёСЏ С‚Р°Р±Р»РёС†С‹ РїСЂРё РєР°Р¶РґРѕРј РґРѕР±Р°РІР»РµРЅРёРё РЅРѕРІРѕРіРѕ РїСЂРѕС†РµСЃСЃР°
         saveTable(csvFilePath);
     }
 }
 
-//обработчик нажатия на кнопку таблица -> очистить
+//РѕР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ С‚Р°Р±Р»РёС†Р° -> РѕС‡РёСЃС‚РёС‚СЊ
 void Project1::on_actionClear() {
-    //определение активной таблицы
+    //РѕРїСЂРµРґРµР»РµРЅРёРµ Р°РєС‚РёРІРЅРѕР№ С‚Р°Р±Р»РёС†С‹
     if (ui.tableWidget->hasFocus()) {
-        //очистка таблицы процессов
+        //РѕС‡РёСЃС‚РєР° С‚Р°Р±Р»РёС†С‹ РїСЂРѕС†РµСЃСЃРѕРІ
         ui.tableWidget->clearContents();
         ui.tableWidget->setRowCount(0);
         processList.clear();
 
-        //очистка CSV файла для таблицы
+        //РѕС‡РёСЃС‚РєР° CSV С„Р°Р№Р»Р° РґР»СЏ С‚Р°Р±Р»РёС†С‹
         QFile file(csvFilePath);
         if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            file.resize(0); //очистка файла
+            file.resize(0); //РѕС‡РёСЃС‚РєР° С„Р°Р№Р»Р°
             file.close();
         }
     }
     else if (ui.autoStartTableWidget->hasFocus()) {
-        //очистка таблицы автозапуска
+        //РѕС‡РёСЃС‚РєР° С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
         ui.autoStartTableWidget->clearContents();
         ui.autoStartTableWidget->setRowCount(0);
         autoStartProcesses.clear();
 
-        //очистка CSV файла для автозапуска
+        //РѕС‡РёСЃС‚РєР° CSV С„Р°Р№Р»Р° РґР»СЏ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
         QFile file(csvFilePath2);
         if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            file.resize(0); //очистка файла
+            file.resize(0); //РѕС‡РёСЃС‚РєР° С„Р°Р№Р»Р°
             file.close();
         }
     }
 }
 
-//обработчик нажатия на кнопку ПКМ -> удалить, для таблицы с процессами
+//РѕР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ РџРљРњ -> СѓРґР°Р»РёС‚СЊ, РґР»СЏ С‚Р°Р±Р»РёС†С‹ СЃ РїСЂРѕС†РµСЃСЃР°РјРё
 void Project1::on_actionDelete() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
-        ui.tableWidget->removeRow(indexRow); //удалить из таблицы
-        processList.removeAt(indexRow); //удалить из списка
-        saveTable(csvFilePath); //обновить файл
+        ui.tableWidget->removeRow(indexRow); //СѓРґР°Р»РёС‚СЊ РёР· С‚Р°Р±Р»РёС†С‹
+        processList.removeAt(indexRow); //СѓРґР°Р»РёС‚СЊ РёР· СЃРїРёСЃРєР°
+        saveTable(csvFilePath); //РѕР±РЅРѕРІРёС‚СЊ С„Р°Р№Р»
     }
 }
 
-//обработчик нажатия на кнопку ПКМ -> изменить параметры запуска, для таблицы с процессами
+//РѕР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ РџРљРњ -> РёР·РјРµРЅРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ Р·Р°РїСѓСЃРєР°, РґР»СЏ С‚Р°Р±Р»РёС†С‹ СЃ РїСЂРѕС†РµСЃСЃР°РјРё
 void Project1::on_actionEdit() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
-        //получение данных о процессе
+        //РїРѕР»СѓС‡РµРЅРёРµ РґР°РЅРЅС‹С… Рѕ РїСЂРѕС†РµСЃСЃРµ
         QString processName = ui.tableWidget->item(indexRow, 0)->text();
         QString processPath = ui.tableWidget->item(indexRow, 1)->text();
 
-        //проверка на дублирование процесса в автозапуске
+        //РїСЂРѕРІРµСЂРєР° РЅР° РґСѓР±Р»РёСЂРѕРІР°РЅРёРµ РїСЂРѕС†РµСЃСЃР° РІ Р°РІС‚РѕР·Р°РїСѓСЃРєРµ
         for (int i = 0; i < ui.autoStartTableWidget->rowCount(); i++) {
             if (ui.autoStartTableWidget->item(i, 0)->text() == processName) {
                 return;
             }
         }
 
-        //добавление процесса в таблицу автозапуска
+        //РґРѕР±Р°РІР»РµРЅРёРµ РїСЂРѕС†РµСЃСЃР° РІ С‚Р°Р±Р»РёС†Сѓ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
         int rowCount = ui.autoStartTableWidget->rowCount();
         ui.autoStartTableWidget->insertRow(rowCount);
-        ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(processName)); //имя
-        ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(processPath)); //путь
-        ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem("0")); //время по умолчанию
+        ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(processName)); //РёРјСЏ
+        ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(processPath)); //РїСѓС‚СЊ
+        ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem("0")); //РІСЂРµРјСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 
-        autoStartProcesses.append({ processName, processPath, 0 }); //сохранение в список автозапуска
-        //сохранение в таблицу автозапуска
+        autoStartProcesses.append({ processName, processPath, 0 }); //СЃРѕС…СЂР°РЅРµРЅРёРµ РІ СЃРїРёСЃРѕРє Р°РІС‚РѕР·Р°РїСѓСЃРєР°
+        //СЃРѕС…СЂР°РЅРµРЅРёРµ РІ С‚Р°Р±Р»РёС†Сѓ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
         saveAutoStartTable(csvFilePath2);
     }
 }
 
-//обработчик нажатия на кнопку заврешить процесс, для таблицы с процессами
+//РѕР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ Р·Р°РІСЂРµС€РёС‚СЊ РїСЂРѕС†РµСЃСЃ, РґР»СЏ С‚Р°Р±Р»РёС†С‹ СЃ РїСЂРѕС†РµСЃСЃР°РјРё
 void Project1::on_buttonClose() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
-        //получение состояния процесса
+        //РїРѕР»СѓС‡РµРЅРёРµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРѕС†РµСЃСЃР°
         QString processStatus = ui.tableWidget->item(indexRow, 2)->text();
 
-        //проверка состояния процесса
+        //РїСЂРѕРІРµСЂРєР° СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРѕС†РµСЃСЃР°
         if (processStatus == "Active") {
-            //получение имени процесса
+            //РїРѕР»СѓС‡РµРЅРёРµ РёРјРµРЅРё РїСЂРѕС†РµСЃСЃР°
             QString processName = ui.tableWidget->item(indexRow, 0)->text();
 
-            //поиск среди всех процессов
+            //РїРѕРёСЃРє СЃСЂРµРґРё РІСЃРµС… РїСЂРѕС†РµСЃСЃРѕРІ
             HANDLE hProcessesSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
             PROCESSENTRY32 pe32;
             pe32.dwSize = sizeof(PROCESSENTRY32);
 
             bool processFound = false;
 
-            //перебор всех процессов
+            //РїРµСЂРµР±РѕСЂ РІСЃРµС… РїСЂРѕС†РµСЃСЃРѕРІ
             if (Process32First(hProcessesSnapshot, &pe32)) {
                 do {
                     QString currentProcessName = QString::fromWCharArray(pe32.szExeFile);
                     
                     if (currentProcessName.compare(processName, Qt::CaseInsensitive) == 0) {
-                        //получение ID процесса
+                        //РїРѕР»СѓС‡РµРЅРёРµ ID РїСЂРѕС†РµСЃСЃР°
                         HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe32.th32ProcessID);
                         if (hProcess != NULL) {
-                            //завершение процесса
+                            //Р·Р°РІРµСЂС€РµРЅРёРµ РїСЂРѕС†РµСЃСЃР°
                             TerminateProcess(hProcess, 0);
                             CloseHandle(hProcess);
                             processFound = true;
@@ -223,23 +223,23 @@ void Project1::on_buttonClose() {
             }
             CloseHandle(hProcessesSnapshot);
             if (processFound) {
-                // Обновление статуса в таблице на "Inactive"
+                // РћР±РЅРѕРІР»РµРЅРёРµ СЃС‚Р°С‚СѓСЃР° РІ С‚Р°Р±Р»РёС†Рµ РЅР° "Inactive"
                 ui.tableWidget->item(indexRow, 2)->setText("Inactive");
             }
         }
     }
 }
 
-//обработчик нажатия на кнопку запуск, для таблицы с процессами
+//РѕР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ Р·Р°РїСѓСЃРє, РґР»СЏ С‚Р°Р±Р»РёС†С‹ СЃ РїСЂРѕС†РµСЃСЃР°РјРё
 void Project1::on_buttonStart() {
-    //перебор процессов в таблице
+    //РїРµСЂРµР±РѕСЂ РїСЂРѕС†РµСЃСЃРѕРІ РІ С‚Р°Р±Р»РёС†Рµ
     for (int i = 0; i < ui.autoStartTableWidget->rowCount(); ++i) {
-        //получение состояния процесса
-        QString processName = ui.autoStartTableWidget->item(i, 0)->text(); //имя
-        QString processPath = ui.autoStartTableWidget->item(i, 1)->text(); //путь
-        int delay = autoStartProcesses[i].delay; //задержка
+        //РїРѕР»СѓС‡РµРЅРёРµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРѕС†РµСЃСЃР°
+        QString processName = ui.autoStartTableWidget->item(i, 0)->text(); //РёРјСЏ
+        QString processPath = ui.autoStartTableWidget->item(i, 1)->text(); //РїСѓС‚СЊ
+        int delay = autoStartProcesses[i].delay; //Р·Р°РґРµСЂР¶РєР°
 
-        //проверка состояния процесса
+        //РїСЂРѕРІРµСЂРєР° СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРѕС†РµСЃСЃР°
         bool isActive = false;
         for (const ProcessInfo& processInfo : processList) {
             if (processInfo.name == processName && processInfo.isActive) {
@@ -248,37 +248,37 @@ void Project1::on_buttonStart() {
             }
         }
 
-        //запуск, если неактивен
+        //Р·Р°РїСѓСЃРє, РµСЃР»Рё РЅРµР°РєС‚РёРІРµРЅ
         if (!isActive) {
             if (delay > 0) {
-                //запуск с задержкой
+                //Р·Р°РїСѓСЃРє СЃ Р·Р°РґРµСЂР¶РєРѕР№
                 QTimer::singleShot(delay * 1000, [=]() {
                     QProcess::startDetached(processPath);
                     });
             }
             else {
-                //немедленный запуск, если задержки нет
+                //РЅРµРјРµРґР»РµРЅРЅС‹Р№ Р·Р°РїСѓСЃРє, РµСЃР»Рё Р·Р°РґРµСЂР¶РєРё РЅРµС‚
                 QProcess::startDetached(processPath);
             }
         }
     }
 }
 
-//обработчик нажатия на кнопку ПКМ -> удалить, для таблицы автозапуска
+//РѕР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ РџРљРњ -> СѓРґР°Р»РёС‚СЊ, РґР»СЏ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
 void Project1::on_actionDeleteAutoStart() {
     int indexRow = ui.autoStartTableWidget->currentRow();
     if (indexRow >= 0) {
-        ui.autoStartTableWidget->removeRow(indexRow); //удалить
-        saveAutoStartTable(csvFilePath2); //обновить файл автозапуска
+        ui.autoStartTableWidget->removeRow(indexRow); //СѓРґР°Р»РёС‚СЊ
+        saveAutoStartTable(csvFilePath2); //РѕР±РЅРѕРІРёС‚СЊ С„Р°Р№Р» Р°РІС‚РѕР·Р°РїСѓСЃРєР°
     }
 };
 
-//обработчик нажатия на кнопку ПКМ -> установить время, для таблицы с автозапуском
+//РѕР±СЂР°Р±РѕС‚С‡РёРє РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ РџРљРњ -> СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РІСЂРµРјСЏ, РґР»СЏ С‚Р°Р±Р»РёС†С‹ СЃ Р°РІС‚РѕР·Р°РїСѓСЃРєРѕРј
 void Project1::on_actionSetTime() {
     int indexRow = ui.autoStartTableWidget->currentRow();
     if (indexRow >= 0) {
-        const int minDelay = 1;    //min задержка в секундах
-        const int maxDelay = 3600; //max задержка в секундах
+        const int minDelay = 1;    //min Р·Р°РґРµСЂР¶РєР° РІ СЃРµРєСѓРЅРґР°С…
+        const int maxDelay = 3600; //max Р·Р°РґРµСЂР¶РєР° РІ СЃРµРєСѓРЅРґР°С…
         bool ok;
         int delay = QInputDialog::getInt(this, tr("Set Time"),
             tr("Enter delay in seconds:"),
@@ -286,17 +286,17 @@ void Project1::on_actionSetTime() {
             minDelay, maxDelay, 1, &ok);
 
         if (ok) {
-            //обновление времени в таблице и в структуре
+            //РѕР±РЅРѕРІР»РµРЅРёРµ РІСЂРµРјРµРЅРё РІ С‚Р°Р±Р»РёС†Рµ Рё РІ СЃС‚СЂСѓРєС‚СѓСЂРµ
             ui.autoStartTableWidget->item(indexRow, 2)->setText(QString::number(delay));
             autoStartProcesses[indexRow].delay = delay;
 
-            //сохранение в CSV файл
+            //СЃРѕС…СЂР°РЅРµРЅРёРµ РІ CSV С„Р°Р№Р»
             saveAutoStartTable(csvFilePath2);
         }
     }
 }
 
-//метод отображения контекстного меню для таблцы с процессами
+//РјРµС‚РѕРґ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РєРѕРЅС‚РµРєСЃС‚РЅРѕРіРѕ РјРµРЅСЋ РґР»СЏ С‚Р°Р±Р»С†С‹ СЃ РїСЂРѕС†РµСЃСЃР°РјРё
 void Project1::showContextMenu(const QPoint& pos) {
     QTableWidgetItem* item = ui.tableWidget->itemAt(pos);
     if (item) {
@@ -307,7 +307,7 @@ void Project1::showContextMenu(const QPoint& pos) {
     }
 }
 
-//метод отображения контекстного меню для таблицы автозапуска
+//РјРµС‚РѕРґ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РєРѕРЅС‚РµРєСЃС‚РЅРѕРіРѕ РјРµРЅСЋ РґР»СЏ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
 void Project1::showContextMenu2(const QPoint& pos) {
     QTableWidgetItem* item = ui.autoStartTableWidget->itemAt(pos);
     if (item) {
@@ -318,7 +318,7 @@ void Project1::showContextMenu2(const QPoint& pos) {
     }
 }
 
-//метод для сохранения списка пользователя в CSV файл
+//РјРµС‚РѕРґ РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ СЃРїРёСЃРєР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІ CSV С„Р°Р№Р»
 void Project1::saveTable(const QString& filePath) {
     QFile file(filePath);
 
@@ -326,15 +326,15 @@ void Project1::saveTable(const QString& filePath) {
         QTextStream stream(&file);
 
         for (int i = 0; i < ui.tableWidget->rowCount(); ++i) {
-            QString name = ui.tableWidget->item(i, 0)->text(); //имя файла
-            QString path = ui.tableWidget->item(i, 1)->text(); //путь к файлу
-            stream << name << "," << path << "\n"; //сохранение в формате CSV
+            QString name = ui.tableWidget->item(i, 0)->text(); //РёРјСЏ С„Р°Р№Р»Р°
+            QString path = ui.tableWidget->item(i, 1)->text(); //РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ
+            stream << name << "," << path << "\n"; //СЃРѕС…СЂР°РЅРµРЅРёРµ РІ С„РѕСЂРјР°С‚Рµ CSV
         }
         file.close();
     }
 }
 
-//метод для загрузки списка пользователя из CSV файла
+//РјРµС‚РѕРґ РґР»СЏ Р·Р°РіСЂСѓР·РєРё СЃРїРёСЃРєР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР· CSV С„Р°Р№Р»Р°
 void Project1::loadTable(const QString& filePath) {
     QFile file(filePath);
 
@@ -342,7 +342,7 @@ void Project1::loadTable(const QString& filePath) {
         QTextStream stream(&file);
         QString line;
 
-        //очистка таблицы перед загрузкой данных
+        //РѕС‡РёСЃС‚РєР° С‚Р°Р±Р»РёС†С‹ РїРµСЂРµРґ Р·Р°РіСЂСѓР·РєРѕР№ РґР°РЅРЅС‹С…
         ui.tableWidget->setRowCount(0);
         processList.clear();
 
@@ -350,24 +350,24 @@ void Project1::loadTable(const QString& filePath) {
             line = stream.readLine();
             QStringList rowData = line.split(",");
 
-            if (rowData.size() < 2) continue; //пропуск некорректных строк
+            if (rowData.size() < 2) continue; //РїСЂРѕРїСѓСЃРє РЅРµРєРѕСЂСЂРµРєС‚РЅС‹С… СЃС‚СЂРѕРє
 
-            //добавление процесса в список processList
+            //РґРѕР±Р°РІР»РµРЅРёРµ РїСЂРѕС†РµСЃСЃР° РІ СЃРїРёСЃРѕРє processList
             ProcessInfo processInfo = { rowData[0], rowData[1], false };
             processList.append(processInfo);
 
             int rowCount = ui.tableWidget->rowCount();
             ui.tableWidget->insertRow(rowCount);
 
-            ui.tableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя файла
-            ui.tableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь к файлу
-            ui.tableWidget->setItem(rowCount, 2, new QTableWidgetItem("Inactive")); //статус по умолочанию
+            ui.tableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //РёРјСЏ С„Р°Р№Р»Р°
+            ui.tableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ
+            ui.tableWidget->setItem(rowCount, 2, new QTableWidgetItem("Inactive")); //СЃС‚Р°С‚СѓСЃ РїРѕ СѓРјРѕР»РѕС‡Р°РЅРёСЋ
         }
         file.close();
     }
 }
 
-//метод для сохранения списка автозапуска в CSV файл
+//РјРµС‚РѕРґ РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ СЃРїРёСЃРєР° Р°РІС‚РѕР·Р°РїСѓСЃРєР° РІ CSV С„Р°Р№Р»
 void Project1::saveAutoStartTable(const QString& filePath) {
     QFile file(filePath);
 
@@ -375,16 +375,16 @@ void Project1::saveAutoStartTable(const QString& filePath) {
         QTextStream stream(&file);
 
         for (int i = 0; i < ui.autoStartTableWidget->rowCount(); ++i) {
-            QString name = ui.autoStartTableWidget->item(i, 0)->text(); //имя
-            QString path = ui.autoStartTableWidget->item(i, 1)->text(); //путь
-            QString delay = ui.autoStartTableWidget->item(i, 2)->text(); //время
-            stream << name << "," << path << "," << delay << "\n"; //сохранить
+            QString name = ui.autoStartTableWidget->item(i, 0)->text(); //РёРјСЏ
+            QString path = ui.autoStartTableWidget->item(i, 1)->text(); //РїСѓС‚СЊ
+            QString delay = ui.autoStartTableWidget->item(i, 2)->text(); //РІСЂРµРјСЏ
+            stream << name << "," << path << "," << delay << "\n"; //СЃРѕС…СЂР°РЅРёС‚СЊ
         }
         file.close();
     }
 }
 
-//метод для загрузки списка автозапуска в CSV файл
+//РјРµС‚РѕРґ РґР»СЏ Р·Р°РіСЂСѓР·РєРё СЃРїРёСЃРєР° Р°РІС‚РѕР·Р°РїСѓСЃРєР° РІ CSV С„Р°Р№Р»
 void Project1::loadAutoStartTable(const QString& filePath) {
     QFile file(filePath);
 
@@ -392,7 +392,7 @@ void Project1::loadAutoStartTable(const QString& filePath) {
         QTextStream stream(&file);
         QString line;
 
-        //очистка таблицы перед загрузкой данных
+        //РѕС‡РёСЃС‚РєР° С‚Р°Р±Р»РёС†С‹ РїРµСЂРµРґ Р·Р°РіСЂСѓР·РєРѕР№ РґР°РЅРЅС‹С…
         ui.autoStartTableWidget->setRowCount(0);
         autoStartProcesses.clear();
 
@@ -400,70 +400,70 @@ void Project1::loadAutoStartTable(const QString& filePath) {
             line = stream.readLine();
             QStringList rowData = line.split(",");
 
-            if (rowData.size() < 3) continue; //пропуск некорректных строк
+            if (rowData.size() < 3) continue; //РїСЂРѕРїСѓСЃРє РЅРµРєРѕСЂСЂРµРєС‚РЅС‹С… СЃС‚СЂРѕРє
 
-            //добавление процесса в таблицу автозапуска
+            //РґРѕР±Р°РІР»РµРЅРёРµ РїСЂРѕС†РµСЃСЃР° РІ С‚Р°Р±Р»РёС†Сѓ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
             int rowCount = ui.autoStartTableWidget->rowCount();
             ui.autoStartTableWidget->insertRow(rowCount);
-            ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя
-            ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь
-            ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem(rowData[2])); //время
+            ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //РёРјСЏ
+            ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //РїСѓС‚СЊ
+            ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem(rowData[2])); //РІСЂРµРјСЏ
         
-            //добавление процесса в список автозапуска
+            //РґРѕР±Р°РІР»РµРЅРёРµ РїСЂРѕС†РµСЃСЃР° РІ СЃРїРёСЃРѕРє Р°РІС‚РѕР·Р°РїСѓСЃРєР°
             AutoStartProcess autoStartProcess = { rowData[0], rowData[1], rowData[2].toInt() };
             autoStartProcesses.append(autoStartProcess);
         }
         file.close();
     }
-    on_buttonStart(); //автозапуск программ из таблицы
+    on_buttonStart(); //Р°РІС‚РѕР·Р°РїСѓСЃРє РїСЂРѕРіСЂР°РјРј РёР· С‚Р°Р±Р»РёС†С‹
 }
 
-//метод определения активности процессов
+//РјРµС‚РѕРґ РѕРїСЂРµРґРµР»РµРЅРёСЏ Р°РєС‚РёРІРЅРѕСЃС‚Рё РїСЂРѕС†РµСЃСЃРѕРІ
 void Project1::checkProcesses() {
-    //снимок всех процессов в системе
+    //СЃРЅРёРјРѕРє РІСЃРµС… РїСЂРѕС†РµСЃСЃРѕРІ РІ СЃРёСЃС‚РµРјРµ
     HANDLE hProcessesSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
-    PROCESSENTRY32 pe32; //инф-я о процессе
-    pe32.dwSize = sizeof(PROCESSENTRY32); //размер структуры
+    PROCESSENTRY32 pe32; //РёРЅС„-СЏ Рѕ РїСЂРѕС†РµСЃСЃРµ
+    pe32.dwSize = sizeof(PROCESSENTRY32); //СЂР°Р·РјРµСЂ СЃС‚СЂСѓРєС‚СѓСЂС‹
 
-    //установка статуса по умолочанию для всех процессов
+    //СѓСЃС‚Р°РЅРѕРІРєР° СЃС‚Р°С‚СѓСЃР° РїРѕ СѓРјРѕР»РѕС‡Р°РЅРёСЋ РґР»СЏ РІСЃРµС… РїСЂРѕС†РµСЃСЃРѕРІ
     for (int i = 0; i < processList.size(); ++i) {
         processList[i].isActive = false;
     }
 
-    //перебор всех процессов
+    //РїРµСЂРµР±РѕСЂ РІСЃРµС… РїСЂРѕС†РµСЃСЃРѕРІ
     if (Process32First(hProcessesSnapshot, &pe32)) {
         do {
             QString currentProcessName = QString::fromWCharArray(pe32.szExeFile);
 
             for (int i = 0; i < processList.size(); ++i) {
                 if (processList[i].name == currentProcessName) {
-                    processList[i].isActive = true; //процесс найден -> активен
+                    processList[i].isActive = true; //РїСЂРѕС†РµСЃСЃ РЅР°Р№РґРµРЅ -> Р°РєС‚РёРІРµРЅ
                 }
             }
         } while (Process32Next(hProcessesSnapshot, &pe32));
     }
     CloseHandle(hProcessesSnapshot);
 
-    //обновление статуса в таблице
+    //РѕР±РЅРѕРІР»РµРЅРёРµ СЃС‚Р°С‚СѓСЃР° РІ С‚Р°Р±Р»РёС†Рµ
     for (int i = 0; i < processList.size(); ++i) {
         for (int j = 0; j < ui.tableWidget->rowCount(); ++j) {
             if (ui.tableWidget->item(j, 0)->text().compare(processList[i].name, Qt::CaseInsensitive) == 0) {
                 ui.tableWidget->item(j, 2)->setText(processList[i].isActive ? "Active" : "Inactive");
                 
-                //установка фона активности
+                //СѓСЃС‚Р°РЅРѕРІРєР° С„РѕРЅР° Р°РєС‚РёРІРЅРѕСЃС‚Рё
                 if (processList[i].isActive) {
                     ui.tableWidget->item(j, 0)->setBackground(QBrush(Qt::green));
                     ui.tableWidget->item(j, 1)->setBackground(QBrush(Qt::green));
-                    ui.tableWidget->item(j, 2)->setBackground(QBrush(Qt::green)); //зеленый для активных
+                    ui.tableWidget->item(j, 2)->setBackground(QBrush(Qt::green)); //Р·РµР»РµРЅС‹Р№ РґР»СЏ Р°РєС‚РёРІРЅС‹С…
                 }
                 else {
                     ui.tableWidget->item(j, 0)->setBackground(QBrush(Qt::red));
                     ui.tableWidget->item(j, 1)->setBackground(QBrush(Qt::red));
-                    ui.tableWidget->item(j, 2)->setBackground(QBrush(Qt::red)); //красный для неактивных
+                    ui.tableWidget->item(j, 2)->setBackground(QBrush(Qt::red)); //РєСЂР°СЃРЅС‹Р№ РґР»СЏ РЅРµР°РєС‚РёРІРЅС‹С…
                 }
                 
-                break; //выход из внутреннего цикла
+                break; //РІС‹С…РѕРґ РёР· РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ С†РёРєР»Р°
             }
         }
     }

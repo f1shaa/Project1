@@ -1,18 +1,18 @@
-#pragma once
+п»ї#pragma once
 
 #include <QtWidgets/QMainWindow>
 #include "ui_Project1.h"
 #include <QTimer>
 #include <QDir>
 
-//структура информации о процессе
+//СЃС‚СЂСѓРєС‚СѓСЂР° РёРЅС„РѕСЂРјР°С†РёРё Рѕ РїСЂРѕС†РµСЃСЃРµ
 struct ProcessInfo {
     QString name;
     QString path;
     bool isActive;
 };
 
-//структура таблицы автозапуска
+//СЃС‚СЂСѓРєС‚СѓСЂР° С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
 struct AutoStartProcess {
     QString name;
     QString path;
@@ -28,29 +28,29 @@ public:
     ~Project1();
 
 private slots:
-    void checkProcesses(); //проверка состояния процессов
-    void on_actionOpen(); //файл -> открыть...
-    void on_actionClear(); //таблица -> очистить...
-    void on_actionDelete(); //ПКМ -> удалить...
-    void on_actionEdit(); //ПКЬ -> изменить параметры запуска...
-    void on_buttonClose(); //завершить процесс
-    void on_buttonStart(); //запуск процессов из автозапуска
+    void checkProcesses(); //РїСЂРѕРІРµСЂРєР° СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРѕС†РµСЃСЃРѕРІ
+    void on_actionOpen(); //С„Р°Р№Р» -> РѕС‚РєСЂС‹С‚СЊ...
+    void on_actionClear(); //С‚Р°Р±Р»РёС†Р° -> РѕС‡РёСЃС‚РёС‚СЊ...
+    void on_actionDelete(); //РџРљРњ -> СѓРґР°Р»РёС‚СЊ...
+    void on_actionEdit(); //РџРљР¬ -> РёР·РјРµРЅРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ Р·Р°РїСѓСЃРєР°...
+    void on_buttonClose(); //Р·Р°РІРµСЂС€РёС‚СЊ РїСЂРѕС†РµСЃСЃ
+    void on_buttonStart(); //Р·Р°РїСѓСЃРє РїСЂРѕС†РµСЃСЃРѕРІ РёР· Р°РІС‚РѕР·Р°РїСѓСЃРєР°
 
-    //для таблицы автозапуска
-    void on_actionDeleteAutoStart(); //ПКМ -> удалить...
-    void on_actionSetTime(); //ПКМ -> установить время...
+    //РґР»СЏ С‚Р°Р±Р»РёС†С‹ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
+    void on_actionDeleteAutoStart(); //РџРљРњ -> СѓРґР°Р»РёС‚СЊ...
+    void on_actionSetTime(); //РџРљРњ -> СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РІСЂРµРјСЏ...
 
 private:
     QMenu* contextMenu;
     QMenu* autoStartContextMenu;
 
-    void saveTable(const QString& filePath); //сохранение списка пользователя в CSV
-    void loadTable(const QString& filePath); //загрузка списка пользователя из CSV
-    void showContextMenu(const QPoint& pos); //отображение контекстного меню для процессов
+    void saveTable(const QString& filePath); //СЃРѕС…СЂР°РЅРµРЅРёРµ СЃРїРёСЃРєР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІ CSV
+    void loadTable(const QString& filePath); //Р·Р°РіСЂСѓР·РєР° СЃРїРёСЃРєР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР· CSV
+    void showContextMenu(const QPoint& pos); //РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ РєРѕРЅС‚РµРєСЃС‚РЅРѕРіРѕ РјРµРЅСЋ РґР»СЏ РїСЂРѕС†РµСЃСЃРѕРІ
 
-    void saveAutoStartTable(const QString& filePath); //сохранения списка автозапуска в CSV
-    void loadAutoStartTable(const QString& filePath); //загрузка списка автозапуска в CSV
-    void showContextMenu2(const QPoint& pos); //отображение контекстного меню для автозапуска
+    void saveAutoStartTable(const QString& filePath); //СЃРѕС…СЂР°РЅРµРЅРёСЏ СЃРїРёСЃРєР° Р°РІС‚РѕР·Р°РїСѓСЃРєР° РІ CSV
+    void loadAutoStartTable(const QString& filePath); //Р·Р°РіСЂСѓР·РєР° СЃРїРёСЃРєР° Р°РІС‚РѕР·Р°РїСѓСЃРєР° РІ CSV
+    void showContextMenu2(const QPoint& pos); //РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ РєРѕРЅС‚РµРєСЃС‚РЅРѕРіРѕ РјРµРЅСЋ РґР»СЏ Р°РІС‚РѕР·Р°РїСѓСЃРєР°
 
     Ui::Project1Class ui;
     QTimer* timer;
