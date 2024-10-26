@@ -10,6 +10,7 @@ struct ProcessInfo {
     QString name;
     QString path;
     bool isActive;
+    bool wasStarted;
 };
 
 //структура таблицы автозапуска
@@ -39,6 +40,8 @@ private slots:
     //для таблицы автозапуска
     void on_actionDeleteAutoStart(); //ПКМ -> удалить...
     void on_actionSetTime(); //ПКМ -> установить время...
+
+    void checkAndRestartProcesses(); //перезапуск закрытых процессов в процессе работы приложения
 
 private:
     QMenu* contextMenu;

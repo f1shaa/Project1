@@ -97,7 +97,7 @@ void Project1::on_actionOpen() {
         }
 
         //добавление информации о процессе в список
-        ProcessInfo processInfo = { fileNameInfo, filePath, false };
+        ProcessInfo processInfo = { fileNameInfo, filePath, false, false };
         processList.append(processInfo);
 
         int rowCount = ui.tableWidget->rowCount();
@@ -264,6 +264,13 @@ void Project1::on_buttonStart() {
 void Project1::on_actionDeleteAutoStart() {
     int indexRow = ui.autoStartTableWidget->currentRow();
     if (indexRow >= 0) {
+        QString processName = ui.autoStartTableWidget->item(indexRow, 0)->text();
+        for (int j = 0; j < autoStartProcesses.size(); ++j) {
+            if (autoStartProcesses[j].name == processName) {
+                autoStartProcesses[j].delay = 0; // Установить задержку в 0 секунд
+                break;
+            }
+        }
         ui.autoStartTableWidget->removeRow(indexRow); //удалить
         saveTable(csvFilePath); //обновить файл автозапуска
     }
@@ -276,8 +283,8 @@ void Project1::on_actionSetTime() {
         const int minDelay = 1;    //min задержка в секундах
         const int maxDelay = 3600; //max задержка в секундах
         bool ok;
-        int delay = QInputDialog::getInt(this, tr("Set Time"),
-            tr("Enter delay in seconds:"),
+        int delay = QInputDialog::getInt(this, tr("Установить время"),
+            tr("Введите задержку в секундах:"),
             ui.autoStartTableWidget->item(indexRow, 2)->text().toInt(),
             minDelay, maxDelay, 1, &ok);
 
@@ -392,6 +399,40 @@ void Project1::loadTable(const QString& filePath) {
     on_buttonStart(); //автозапуск процессов из автозапуска
 }
 
+//метод для перезапуска закрытых ранее открытых процессов
+void Project1::checkAndRestartProcesses() {
+    for (int i = 0; i < processList.size(); ++i) {
+        if (!processList[i].isActive && processList[i].wasStarted) {
+            bool foundInAutoStartProcesses = false; //флаг присутствия в автозапуске
+            //перебор всех процессов в таблице автозапуска
+            for (int j = 0; j < autoStartProcesses.size(); ++j) {
+                //поиск процесса в автозапуске
+                if (autoStartProcesses[j].name == processList[i].name) {
+                    foundInAutoStartProcesses = true; //процесс есть в списке!
+                    int delay = autoStartProcesses[j].delay;
+                    //если есть время отложенного запуска
+                    if (delay > 0) {
+                        QTimer::singleShot(delay * 1000, [=]() {
+                            //запуск с задержкой
+                            QProcess::startDetached("\"" + processList[i].path + "\"");
+                            });
+                        return;
+                    }
+                    else {
+                        //мнгновенный запуск
+                        QProcess::startDetached("\"" + processList[i].path + "\"");
+                    }
+                    break;
+                }
+            }
+            //если процесса не было в списке, перезапустить без задержек
+            if (!foundInAutoStartProcesses) {
+                QProcess::startDetached("\"" + processList[i].path + "\"");
+            }
+        }
+    }
+}
+
 //метод определения активности процессов
 void Project1::checkProcesses() {
     //снимок всех процессов в системе
@@ -413,6 +454,8 @@ void Project1::checkProcesses() {
             for (int i = 0; i < processList.size(); ++i) {
                 if (processList[i].name == currentProcessName) {
                     processList[i].isActive = true; //процесс найден -> активен
+                    processList[i].wasStarted = true; //флаг, отслеживания запуска процесса
+                    break;
                 }
             }
         } while (Process32Next(hProcessesSnapshot, &pe32));
@@ -441,4 +484,5 @@ void Project1::checkProcesses() {
             }
         }
     }
+    checkAndRestartProcesses();
 }
