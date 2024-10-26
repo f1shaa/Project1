@@ -18,8 +18,6 @@
 
 //путь к файлу со списком приложений
 const QString csvFilePath = QDir::currentPath() + "/process_list.csv";
-//путь к файлу со списком автозапуска приложений
-const QString csvFilePath2 = QDir::currentPath() + "/process_list_2.csv";
 
 //контекстное меню
 QMenu* contextMenu;
@@ -30,11 +28,8 @@ Project1::Project1(QWidget *parent)
     //запуск приложения
     ui.setupUi(this);
 
-    //загрузка таблицы со списком пользователя из файла при запуске
+    //загрузка таблиц при запуске
     loadTable(csvFilePath);
-
-    //загрузка таблицы с автозапуском из файла при запуске
-    loadAutoStartTable(csvFilePath2);
 
     //подключение действия файл -> открыть...
     connect(ui.actionOpen, &QAction::triggered, this, &Project1::on_actionOpen);
@@ -117,32 +112,21 @@ void Project1::on_actionOpen() {
 
 //обработчик нажатия на кнопку таблица -> очистить
 void Project1::on_actionClear() {
-    //определение активной таблицы
-    if (ui.tableWidget->hasFocus()) {
-        //очистка таблицы процессов
-        ui.tableWidget->clearContents();
-        ui.tableWidget->setRowCount(0);
-        processList.clear();
+    //очистка таблицы процессов
+    ui.tableWidget->clearContents();
+    ui.tableWidget->setRowCount(0);
+    processList.clear();
 
-        //очистка CSV файла для таблицы
-        QFile file(csvFilePath);
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            file.resize(0); //очистка файла
-            file.close();
-        }
-    }
-    else if (ui.autoStartTableWidget->hasFocus()) {
-        //очистка таблицы автозапуска
-        ui.autoStartTableWidget->clearContents();
-        ui.autoStartTableWidget->setRowCount(0);
-        autoStartProcesses.clear();
+    //очистка таблицы автозапуска
+    ui.autoStartTableWidget->clearContents();
+    ui.autoStartTableWidget->setRowCount(0);
+    autoStartProcesses.clear();
 
-        //очистка CSV файла для автозапуска
-        QFile file(csvFilePath2);
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            file.resize(0); //очистка файла
-            file.close();
-        }
+    //очистка CSV файла
+    QFile file(csvFilePath);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        file.resize(0); //очистка файла
+        file.close();
     }
 }
 
@@ -180,7 +164,7 @@ void Project1::on_actionEdit() {
 
         autoStartProcesses.append({ processName, processPath, 0 }); //сохранение в список автозапуска
         //сохранение в таблицу автозапуска
-        saveAutoStartTable(csvFilePath2);
+        saveTable(csvFilePath);
     }
 }
 
@@ -269,7 +253,7 @@ void Project1::on_actionDeleteAutoStart() {
     int indexRow = ui.autoStartTableWidget->currentRow();
     if (indexRow >= 0) {
         ui.autoStartTableWidget->removeRow(indexRow); //удалить
-        saveAutoStartTable(csvFilePath2); //обновить файл автозапуска
+        saveTable(csvFilePath); //обновить файл автозапуска
     }
 };
 
@@ -291,7 +275,7 @@ void Project1::on_actionSetTime() {
             autoStartProcesses[indexRow].delay = delay;
 
             //сохранение в CSV файл
-            saveAutoStartTable(csvFilePath2);
+            saveTable(csvFilePath);
         }
     }
 }
@@ -328,7 +312,20 @@ void Project1::saveTable(const QString& filePath) {
         for (int i = 0; i < ui.tableWidget->rowCount(); ++i) {
             QString name = ui.tableWidget->item(i, 0)->text(); //имя файла
             QString path = ui.tableWidget->item(i, 1)->text(); //путь к файлу
-            stream << name << "," << path << "\n"; //сохранение в формате CSV
+            QString isActive = "0";
+            QString isAutoStart = "0";
+            for (int j = 0; j < ui.autoStartTableWidget->rowCount(); ++j) {
+                if (ui.autoStartTableWidget->item(j, 0)->text() == name &&
+                    ui.autoStartTableWidget->item(j, 1)->text() == path) {
+                    isAutoStart = "1";
+                    QString delay = ui.autoStartTableWidget->item(j, 2)->text();
+                    stream << name << ',' << path << ',' << isActive << ',' << isAutoStart << ',' << delay << '\n';
+                    break;
+                }
+            }
+            if (isAutoStart == "0") {
+                stream << name << ',' << path << ',' << isActive << ',' << isAutoStart << ",0\n";
+            }
         }
         file.close();
     }
@@ -338,19 +335,22 @@ void Project1::saveTable(const QString& filePath) {
 void Project1::loadTable(const QString& filePath) {
     QFile file(filePath);
 
+    //очистка таблиц перед загрузкой данных
+    ui.tableWidget->setRowCount(0);
+    ui.autoStartTableWidget->setRowCount(0);
+
+    processList.clear();
+    autoStartProcesses.clear();
+
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream stream(&file);
         QString line;
-
-        //очистка таблицы перед загрузкой данных
-        ui.tableWidget->setRowCount(0);
-        processList.clear();
 
         while (!stream.atEnd()) {
             line = stream.readLine();
             QStringList rowData = line.split(",");
 
-            if (rowData.size() < 2) continue; //пропуск некорректных строк
+            if (rowData.size() < 5) continue; //пропуск некорректных строк
 
             //добавление процесса в список processList
             ProcessInfo processInfo = { rowData[0], rowData[1], false };
@@ -362,60 +362,22 @@ void Project1::loadTable(const QString& filePath) {
             ui.tableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя файла
             ui.tableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь к файлу
             ui.tableWidget->setItem(rowCount, 2, new QTableWidgetItem("Inactive")); //статус по умолочанию
+
+            //если установлен флаг активности
+            if (rowData[3] == "1") {
+                int rowCount = ui.autoStartTableWidget->rowCount();
+                ui.autoStartTableWidget->insertRow(rowCount);
+                ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя
+                ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь
+                ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem(rowData[4])); //время
+            
+                AutoStartProcess autoStartProcess = { rowData[0], rowData[1], rowData[4].toInt() };
+                autoStartProcesses.append(autoStartProcess);
+            }
         }
         file.close();
     }
-}
-
-//метод для сохранения списка автозапуска в CSV файл
-void Project1::saveAutoStartTable(const QString& filePath) {
-    QFile file(filePath);
-
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream stream(&file);
-
-        for (int i = 0; i < ui.autoStartTableWidget->rowCount(); ++i) {
-            QString name = ui.autoStartTableWidget->item(i, 0)->text(); //имя
-            QString path = ui.autoStartTableWidget->item(i, 1)->text(); //путь
-            QString delay = ui.autoStartTableWidget->item(i, 2)->text(); //время
-            stream << name << "," << path << "," << delay << "\n"; //сохранить
-        }
-        file.close();
-    }
-}
-
-//метод для загрузки списка автозапуска в CSV файл
-void Project1::loadAutoStartTable(const QString& filePath) {
-    QFile file(filePath);
-
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream stream(&file);
-        QString line;
-
-        //очистка таблицы перед загрузкой данных
-        ui.autoStartTableWidget->setRowCount(0);
-        autoStartProcesses.clear();
-
-        while (!stream.atEnd()) {
-            line = stream.readLine();
-            QStringList rowData = line.split(",");
-
-            if (rowData.size() < 3) continue; //пропуск некорректных строк
-
-            //добавление процесса в таблицу автозапуска
-            int rowCount = ui.autoStartTableWidget->rowCount();
-            ui.autoStartTableWidget->insertRow(rowCount);
-            ui.autoStartTableWidget->setItem(rowCount, 0, new QTableWidgetItem(rowData[0])); //имя
-            ui.autoStartTableWidget->setItem(rowCount, 1, new QTableWidgetItem(rowData[1])); //путь
-            ui.autoStartTableWidget->setItem(rowCount, 2, new QTableWidgetItem(rowData[2])); //время
-        
-            //добавление процесса в список автозапуска
-            AutoStartProcess autoStartProcess = { rowData[0], rowData[1], rowData[2].toInt() };
-            autoStartProcesses.append(autoStartProcess);
-        }
-        file.close();
-    }
-    on_buttonStart(); //автозапуск программ из таблицы
+    on_buttonStart(); //автозапуск процессов из автозапуска
 }
 
 //метод определения активности процессов

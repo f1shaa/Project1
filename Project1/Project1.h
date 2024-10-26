@@ -48,8 +48,8 @@ private:
     void loadTable(const QString& filePath); //загрузка списка пользователя из CSV
     void showContextMenu(const QPoint& pos); //отображение контекстного меню для процессов
 
-    void saveAutoStartTable(const QString& filePath); //сохранения списка автозапуска в CSV
-    void loadAutoStartTable(const QString& filePath); //загрузка списка автозапуска в CSV
+    //void saveAutoStartTable(const QString& filePath); //сохранения списка автозапуска в CSV
+    //void loadAutoStartTable(const QString& filePath); //загрузка списка автозапуска в CSV
     void showContextMenu2(const QPoint& pos); //отображение контекстного меню для автозапуска
 
     Ui::Project1Class ui;
