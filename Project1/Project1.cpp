@@ -124,8 +124,8 @@ void Project1::on_actionOpen() {
     }
 }
 
-//обработчик нажатия на кнопку таблица -> очистить
-void Project1::on_actionClear() {
+//метод очистки таблиц (если выбрана таблица процессов)
+void Project1::on_actionClearFirst() {
     //очистка таблицы процессов
     ui.tableWidget->clearContents();
     ui.tableWidget->setRowCount(0);
@@ -141,6 +141,32 @@ void Project1::on_actionClear() {
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         file.resize(0); //очистка файла
         file.close();
+    }
+}
+
+//обработчик нажатия на кнопку таблица -> очистить
+void Project1::on_actionClear() {
+    if (currentTabIndex == 0) {       
+        on_actionClearFirst();
+    }
+    else if (currentTabIndex == 1) {
+        //очистка таблицы автозапуска
+        ui.autoStartTableWidget->clearContents();
+        ui.autoStartTableWidget->setRowCount(0);
+        autoStartProcesses.clear();
+
+        //сохранение изменений в список и CSV файл
+        QFile file(csvFilePath);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream stream(&file);
+
+            for (int i = 0; i < processList.size(); ++i) {
+                stream << processList[i].name << "," << processList[i].path 
+                    << "," << (processList[i].isActive ? "1" : "0") << ",0,0\n";
+            }
+            file.close();
+        }
+        saveTable(csvFilePath);
     }
 }
 
