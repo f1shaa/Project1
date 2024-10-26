@@ -37,7 +37,8 @@ private slots:
     void on_buttonClose(); //завершить процесс
     void on_buttonStart(); //запуск процессов из автозапуска
     void tabActive(int index); //определения активной таблицы
-    void onDeleteButtonClicked(); //метод для кнопки удалить (в быстром доступе)
+    void on_DeleteButtonClicked(); //метод для кнопки удалить (в быстром доступе)
+    void on_actionSetTimeClicked(); //метод для кнопки отложить автозапуск (в быстром доступе)
 
     //для таблицы автозапуска
     void on_actionDeleteAutoStart(); //ПКМ -> удалить...

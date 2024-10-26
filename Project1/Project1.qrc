@@ -1,8 +1,9 @@
 <RCC>
-    <qresource prefix="/Project1">
-        <file>img/cancel.png</file>
-        <file>img/check.png</file>
-        <file>img/clear.png</file>
-        <file>img/folder.png</file>
-    </qresource>
+  <qresource prefix="/Project1">
+    <file>img/time.png</file>
+    <file>img/cancel.png</file>
+    <file>img/check.png</file>
+    <file>img/clear.png</file>
+    <file>img/folder.png</file>
+  </qresource>
 </RCC>

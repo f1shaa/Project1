@@ -31,6 +31,9 @@ Project1::Project1(QWidget *parent)
     //загрузка таблиц при запуске
     loadTable(csvFilePath);
 
+    //открытие таблицы с процессами
+    ui.tabWidget->setCurrentIndex(0);
+
     //подключение действия файл -> открыть...
     connect(ui.actionOpen, &QAction::triggered, this, &Project1::on_actionOpen);
 
@@ -75,9 +78,10 @@ Project1::Project1(QWidget *parent)
     connect(ui.autoStartTableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu2);
 
     //кнопки в быстром доступе
-    connect(ui.actionDelete, &QAction::triggered, this, &Project1::onDeleteButtonClicked);
+    connect(ui.actionDelete, &QAction::triggered, this, &Project1::on_DeleteButtonClicked);
     connect(ui.actionClear, &QAction::triggered, this, &Project1::on_actionClear);
     connect(ui.actionAddToAutoStart, &QAction::triggered, this, &Project1::on_actionEdit);
+    connect(ui.actionSetTime, &QAction::triggered, this, &Project1::on_actionSetTimeClicked);
 
     connect(ui.tabWidget, &QTabWidget::currentChanged, this, &Project1::tabActive);
 }
@@ -307,13 +311,29 @@ void Project1::on_actionSetTime() {
     }
 }
 
+//обработчик нажатия "Отложить автозапуск" в панели быстрого доступа
+void Project1::on_actionSetTimeClicked() {
+    if (currentTabIndex == 0) {
+        on_actionEdit();
+        ui.tabWidget->setCurrentIndex(1); //переход на страницу автозапуска
+        //выделение только что добавленной строки в автозапуск
+        int newRow = ui.autoStartTableWidget->rowCount() - 1;
+        ui.autoStartTableWidget->setCurrentCell(newRow, 0);
+
+        on_actionSetTime();
+    }
+    else if (currentTabIndex == 1) {
+        on_actionSetTime();
+    }
+}
+
 //метод определения активной таблицы
 void Project1::tabActive(int index) {
     currentTabIndex = index;
 }
 
 //метод для кнопки "Удалить" (в быстром доступе)
-void Project1::onDeleteButtonClicked() {
+void Project1::on_DeleteButtonClicked() {
     if (currentTabIndex == 0) {
         on_actionDelete();  // Удалить из таблицы процессов
     }
@@ -361,7 +381,7 @@ void Project1::saveTable(const QString& filePath) {
                     ui.autoStartTableWidget->item(j, 1)->text() == path) {
                     isAutoStart = "1";
                     QString delay = ui.autoStartTableWidget->item(j, 2)->text();
-                    stream << name << ',' << path << ',' << isActive << ',' << "0" << ',' << delay << '\n';
+                    stream << name << ',' << path << ',' << isActive << ',' << isAutoStart << ',' << delay << '\n';
                     break;
                 }
             }

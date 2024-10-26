@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>602</width>
+    <width>595</width>
     <height>450</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>602</width>
+    <width>595</width>
     <height>450</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>602</width>
+    <width>595</width>
     <height>450</height>
    </size>
   </property>
@@ -166,7 +166,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>602</width>
+     <width>595</width>
      <height>21</height>
     </rect>
    </property>
@@ -203,6 +203,8 @@
    <addaction name="separator"/>
    <addaction name="actionAddToAutoStart"/>
    <addaction name="actionDelete"/>
+   <addaction name="separator"/>
+   <addaction name="actionSetTime"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -238,6 +240,18 @@
    </property>
    <property name="text">
     <string>Добавить в автозапуск</string>
+   </property>
+  </action>
+  <action name="actionSetTime">
+   <property name="icon">
+    <iconset resource="Project1.qrc">
+     <normaloff>:/Project1/img/time.png</normaloff>:/Project1/img/time.png</iconset>
+   </property>
+   <property name="text">
+    <string>Отложить автозапуск</string>
+   </property>
+   <property name="toolTip">
+    <string>Отложить автозапуск</string>
    </property>
   </action>
  </widget>
