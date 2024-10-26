@@ -73,6 +73,10 @@ Project1::Project1(QWidget *parent)
     //политика меню
     ui.autoStartTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui.autoStartTableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu2);
+
+    connect(ui.actionDelete, &QAction::triggered, this, &Project1::on_actionDelete);
+    connect(ui.actionClear, &QAction::triggered, this, &Project1::on_actionClear);
+    connect(ui.actionAddToAutoStart, &QAction::triggered, this, &Project1::on_actionEdit);
 }
 
 Project1::~Project1()
@@ -152,7 +156,7 @@ void Project1::on_actionDelete() {
     }
 }
 
-//обработчик нажатия на кнопку ПКМ -> изменить параметры запуска, для таблицы с процессами
+//обработчик нажатия на кнопку ПКМ -> добавить в автозапуск
 void Project1::on_actionEdit() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
