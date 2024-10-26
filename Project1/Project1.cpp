@@ -48,11 +48,14 @@ Project1::Project1(QWidget *parent)
     //настройка контекстного меню для таблицы с процессами
     contextMenu = new QMenu(this);
     //действия
-    QAction* deleteAction = new QAction("Delete", this);
+    QAction* closeAction = new QAction("Завершить процесс", this);
+    connect(closeAction, &QAction::triggered, this, &Project1::on_buttonClose);
+    QAction* deleteAction = new QAction("Удалить", this);
     connect(deleteAction, &QAction::triggered, this, &Project1::on_actionDelete);
-    QAction* editAction = new QAction("Add auto start", this);
+    QAction* editAction = new QAction("Добавить в автозапуск", this);
     connect(editAction, &QAction::triggered, this, &Project1::on_actionEdit);
     //добавления действия в меню
+    contextMenu->addAction(closeAction);
     contextMenu->addAction(deleteAction);
     contextMenu->addAction(editAction);
     //политика меню
@@ -61,9 +64,9 @@ Project1::Project1(QWidget *parent)
 
     //настройка контекстного меню для таблицы автозапуска
     autoStartContextMenu = new QMenu(this);
-    QAction* deleteAutoStartAction = new QAction("Delete", this);
+    QAction* deleteAutoStartAction = new QAction("Удалить", this);
     connect(deleteAutoStartAction, &QAction::triggered, this, &Project1::on_actionDeleteAutoStart);
-    QAction* setTimeAction = new QAction("Set Time", this);
+    QAction* setTimeAction = new QAction("Установить время", this);
     connect(setTimeAction, &QAction::triggered, this, &Project1::on_actionSetTime);
     autoStartContextMenu->addAction(deleteAutoStartAction);
     autoStartContextMenu->addAction(setTimeAction);
