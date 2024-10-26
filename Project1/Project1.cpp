@@ -135,6 +135,15 @@ void Project1::on_actionDelete() {
     int indexRow = ui.tableWidget->currentRow();
     if (indexRow >= 0) {
         ui.tableWidget->removeRow(indexRow); //удалить из таблицы
+
+        //поиск и удаление из таблицы автозапуска
+        for (int i = 0; i < autoStartProcesses.size(); ++i) {
+            if (processList[indexRow].name == autoStartProcesses[i].name && processList[indexRow].path == autoStartProcesses[i].path) {
+                ui.autoStartTableWidget->removeRow(i);
+                autoStartProcesses.removeAt(i);
+                break;
+            }
+        }
         processList.removeAt(indexRow); //удалить из списка
         saveTable(csvFilePath); //обновить файл
     }
@@ -237,12 +246,12 @@ void Project1::on_buttonStart() {
             if (delay > 0) {
                 //запуск с задержкой
                 QTimer::singleShot(delay * 1000, [=]() {
-                    QProcess::startDetached(processPath);
+                    QProcess::startDetached("\"" + processPath + "\"");
                     });
             }
             else {
                 //немедленный запуск, если задержки нет
-                QProcess::startDetached(processPath);
+                QProcess::startDetached("\"" + processPath + "\"");
             }
         }
     }
