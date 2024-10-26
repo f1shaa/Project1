@@ -74,9 +74,12 @@ Project1::Project1(QWidget *parent)
     ui.autoStartTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui.autoStartTableWidget, &QTableWidget::customContextMenuRequested, this, &Project1::showContextMenu2);
 
-    connect(ui.actionDelete, &QAction::triggered, this, &Project1::on_actionDelete);
+    //кнопки в быстром доступе
+    connect(ui.actionDelete, &QAction::triggered, this, &Project1::onDeleteButtonClicked);
     connect(ui.actionClear, &QAction::triggered, this, &Project1::on_actionClear);
     connect(ui.actionAddToAutoStart, &QAction::triggered, this, &Project1::on_actionEdit);
+
+    connect(ui.tabWidget, &QTabWidget::currentChanged, this, &Project1::tabActive);
 }
 
 Project1::~Project1()
@@ -301,6 +304,21 @@ void Project1::on_actionSetTime() {
             //сохранение в CSV файл
             saveTable(csvFilePath);
         }
+    }
+}
+
+//метод определения активной таблицы
+void Project1::tabActive(int index) {
+    currentTabIndex = index;
+}
+
+//метод для кнопки "Удалить" (в быстром доступе)
+void Project1::onDeleteButtonClicked() {
+    if (currentTabIndex == 0) {
+        on_actionDelete();  // Удалить из таблицы процессов
+    }
+    else if (currentTabIndex == 1) {
+        on_actionDeleteAutoStart();  // Удалить из таблицы автозапуска
     }
 }
 

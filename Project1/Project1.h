@@ -36,6 +36,8 @@ private slots:
     void on_actionEdit(); //ПКЬ -> изменить параметры запуска...
     void on_buttonClose(); //завершить процесс
     void on_buttonStart(); //запуск процессов из автозапуска
+    void tabActive(int index); //определения активной таблицы
+    void onDeleteButtonClicked(); //метод для кнопки удалить (в быстром доступе)
 
     //для таблицы автозапуска
     void on_actionDeleteAutoStart(); //ПКМ -> удалить...
@@ -51,9 +53,7 @@ private:
     void saveTable(const QString& filePath); //сохранение списка пользователя в CSV
     void loadTable(const QString& filePath); //загрузка списка пользователя из CSV
     void showContextMenu(const QPoint& pos); //отображение контекстного меню для процессов
-
-    //void saveAutoStartTable(const QString& filePath); //сохранения списка автозапуска в CSV
-    //void loadAutoStartTable(const QString& filePath); //загрузка списка автозапуска в CSV
+    int currentTabIndex; //индекс активной таблицы
     void showContextMenu2(const QPoint& pos); //отображение контекстного меню для автозапуска
 
     Ui::Project1Class ui;
