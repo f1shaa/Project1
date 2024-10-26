@@ -361,12 +361,12 @@ void Project1::saveTable(const QString& filePath) {
                     ui.autoStartTableWidget->item(j, 1)->text() == path) {
                     isAutoStart = "1";
                     QString delay = ui.autoStartTableWidget->item(j, 2)->text();
-                    stream << name << ',' << path << ',' << isActive << ',' << isAutoStart << ',' << delay << '\n';
+                    stream << name << ',' << path << ',' << isActive << ',' << "0" << ',' << delay << '\n';
                     break;
                 }
             }
             if (isAutoStart == "0") {
-                stream << name << ',' << path << ',' << isActive << ',' << isAutoStart << ",0\n";
+                stream << name << ',' << path << ',' << isActive << ',' << "0" << ",0\n";
             }
         }
         file.close();
@@ -477,7 +477,6 @@ void Project1::checkProcesses() {
     //установка статуса по умолочанию для всех процессов
     for (int i = 0; i < processList.size(); ++i) {
         processList[i].isActive = false;
-        processList[i].wasStarted = false;
     }
 
     //перебор всех процессов
