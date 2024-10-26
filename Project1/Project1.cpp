@@ -455,6 +455,7 @@ void Project1::checkProcesses() {
     //установка статуса по умолочанию для всех процессов
     for (int i = 0; i < processList.size(); ++i) {
         processList[i].isActive = false;
+        processList[i].wasStarted = false;
     }
 
     //перебор всех процессов
