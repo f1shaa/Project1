@@ -46,6 +46,7 @@ private slots:
 private:
     QMenu* contextMenu;
     QMenu* autoStartContextMenu;
+    QHash<QString, bool> processRestartFlags;
 
     void saveTable(const QString& filePath); //сохранение списка пользователя в CSV
     void loadTable(const QString& filePath); //загрузка списка пользователя из CSV

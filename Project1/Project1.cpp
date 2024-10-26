@@ -250,6 +250,7 @@ void Project1::on_buttonStart() {
                 //запуск с задержкой
                 QTimer::singleShot(delay * 1000, [=]() {
                     QProcess::startDetached("\"" + processPath + "\"");
+                    processList[i].wasStarted = true;
                     });
             }
             else {
@@ -404,25 +405,35 @@ void Project1::checkAndRestartProcesses() {
     for (int i = 0; i < processList.size(); ++i) {
         if (!processList[i].isActive && processList[i].wasStarted) {
             bool foundInAutoStartProcesses = false; //флаг присутствия в автозапуске
+
             //перебор всех процессов в таблице автозапуска
             for (int j = 0; j < autoStartProcesses.size(); ++j) {
                 //поиск процесса в автозапуске
                 if (autoStartProcesses[j].name == processList[i].name) {
                     foundInAutoStartProcesses = true; //процесс есть в списке!
                     int delay = autoStartProcesses[j].delay;
-                    //если есть время отложенного запуска
-                    if (delay > 0) {
-                        QTimer::singleShot(delay * 1000, [=]() {
-                            //запуск с задержкой
+
+                    if (!processRestartFlags.value(processList[i].name, false)) {
+                        processRestartFlags[processList[i].name] = true;
+
+                        //если есть время отложенного запуска
+                        if (delay > 0) {
+                            processList[i].isActive = true;
+                            QTimer::singleShot(delay * 1000, [=]() {
+                                //запуск с задержкой
+                                QProcess::startDetached("\"" + processList[i].path + "\"");
+                                processRestartFlags[processList[i].name] = false;
+                                });
+                            return;
+                        }
+                        else {
+                            //мнгновенный запуск
                             QProcess::startDetached("\"" + processList[i].path + "\"");
-                            });
-                        return;
+                            processRestartFlags[processList[i].name] = false;
+                            processList[i].isActive = true;
+                        }
+                        break;
                     }
-                    else {
-                        //мнгновенный запуск
-                        QProcess::startDetached("\"" + processList[i].path + "\"");
-                    }
-                    break;
                 }
             }
             //если процесса не было в списке, перезапустить без задержек
